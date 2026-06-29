@@ -108,6 +108,37 @@ export default function AdminPage() {
     }
   }
 
+  async function extractFromPdf(file, Tesseract, codeRegex) {
+    const pdfjsLib = await import('pdfjs-dist/legacy/build/pdf')
+    pdfjsLib.GlobalWorkerOptions.workerSrc =
+      'https://unpkg.com/pdfjs-dist@3.11.174/legacy/build/pdf.worker.min.js'
+
+    const arrayBuffer = await file.arrayBuffer()
+    const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise
+
+    let fullText = ''
+    for (let p = 1; p <= pdf.numPages; p++) {
+      const page = await pdf.getPage(p)
+      const textContent = await page.getTextContent()
+      fullText += textContent.items.map(it => it.str).join(' ') + '\n'
+    }
+
+    let matches = fullText.match(codeRegex)
+    if (matches && matches.length > 0) return matches[0]
+
+    // No selectable text (likely a scanned/image PDF) — render to canvas and OCR it.
+    const page = await pdf.getPage(1)
+    const viewport = page.getViewport({ scale: 2 })
+    const canvas = document.createElement('canvas')
+    canvas.width = viewport.width
+    canvas.height = viewport.height
+    await page.render({ canvasContext: canvas.getContext('2d'), viewport }).promise
+
+    const { data } = await Tesseract.recognize(canvas, 'eng')
+    matches = data.text.match(codeRegex)
+    return matches && matches.length > 0 ? matches[0] : null
+  }
+
   async function handleExtractCodes(files) {
     if (!files || files.length === 0) return
     setOcrLoading(true)
@@ -120,12 +151,18 @@ export default function AdminPage() {
     const issues = []
 
     for (let i = 0; i < files.length; i++) {
-      setOcrProgress(`Reading image ${i + 1} of ${files.length}...`)
+      setOcrProgress(`Reading file ${i + 1} of ${files.length}...`)
       try {
-        const { data } = await Tesseract.recognize(files[i], 'eng')
-        const matches = data.text.match(codeRegex)
-        if (matches && matches.length > 0) {
-          foundCodes.push(matches[0].toUpperCase())
+        let code = null
+        if (files[i].type === 'application/pdf') {
+          code = await extractFromPdf(files[i], Tesseract, codeRegex)
+        } else {
+          const { data } = await Tesseract.recognize(files[i], 'eng')
+          const matches = data.text.match(codeRegex)
+          code = matches && matches.length > 0 ? matches[0] : null
+        }
+        if (code) {
+          foundCodes.push(code.toUpperCase())
         } else {
           issues.push(files[i].name)
         }
@@ -333,10 +370,10 @@ export default function AdminPage() {
 
             <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-4 space-y-3">
               <label className="block">
-                <span className="block text-sm text-zinc-400 mb-2">Upload gift card images</span>
+                <span className="block text-sm text-zinc-400 mb-2">Upload gift card images or PDFs</span>
                 <input
                   type="file"
-                  accept="image/*"
+                  accept="image/*,.pdf,application/pdf"
                   multiple
                   disabled={ocrLoading}
                   onChange={e => handleExtractCodes(e.target.files)}
