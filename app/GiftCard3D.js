@@ -51,13 +51,6 @@ function Card() {
   const group = useRef()
   const frontTexture = useMemo(() => makeCardTexture(), [])
 
-  const materials = useMemo(() => {
-    const side = new THREE.MeshStandardMaterial({ color: '#caa23a', metalness: 0.7, roughness: 0.35 })
-    const front = new THREE.MeshStandardMaterial({ map: frontTexture, metalness: 0.15, roughness: 0.5 })
-    const back = new THREE.MeshStandardMaterial({ color: '#1a1a1a', metalness: 0.6, roughness: 0.4 })
-    return [side, side, side, side, front, back]
-  }, [frontTexture])
-
   useFrame((state, delta) => {
     if (!group.current) return
     const t = state.clock.getElapsedTime()
@@ -70,8 +63,17 @@ function Card() {
 
   return (
     <group ref={group}>
-      <mesh material={materials}>
+      <mesh>
         <boxGeometry args={[2.2, 1.4, 0.08]} />
+        <meshStandardMaterial color="#caa23a" metalness={0.7} roughness={0.35} />
+      </mesh>
+      <mesh position={[0, 0, 0.045]}>
+        <planeGeometry args={[2.1, 1.32]} />
+        <meshStandardMaterial map={frontTexture} metalness={0.1} roughness={0.5} />
+      </mesh>
+      <mesh position={[0, 0, -0.045]} rotation={[0, Math.PI, 0]}>
+        <planeGeometry args={[2.1, 1.32]} />
+        <meshStandardMaterial color="#1a1a1a" metalness={0.6} roughness={0.4} />
       </mesh>
     </group>
   )
