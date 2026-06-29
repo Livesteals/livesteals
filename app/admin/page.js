@@ -36,6 +36,8 @@ export default function AdminPage() {
   const [resendingId, setResendingId] = useState(null)
   const [resendDone, setResendDone] = useState(null)
 
+  const [resetLoading, setResetLoading] = useState(false)
+
   useEffect(() => {
     const saved = localStorage.getItem('ls_pw')
     if (!saved) return
@@ -125,6 +127,21 @@ export default function AdminPage() {
     }
   }
 
+  async function handleReset() {
+    const confirmed = window.prompt(
+      'This permanently deletes ALL codes and claim cards, including unused gift card codes. This cannot be undone.\n\nType RESET to confirm.'
+    )
+    if (confirmed !== 'RESET') return
+
+    setResetLoading(true)
+    try {
+      await adminFetch('/api/admin/reset', { method: 'POST' })
+      await loadStats()
+    } finally {
+      setResetLoading(false)
+    }
+  }
+
   async function loadClaims() {
     setClaimsLoading(true)
     const res = await adminFetch('/api/admin/claims')
@@ -210,13 +227,22 @@ export default function AdminPage() {
           <div className="space-y-6">
             <div className="flex items-center justify-between">
               <h2 className="text-xl font-bold">Overview</h2>
-              <button
-                onClick={loadStats}
-                disabled={statsLoading}
-                className="text-sm text-zinc-500 hover:text-zinc-300 transition-colors"
-              >
-                {statsLoading ? 'Refreshing...' : 'Refresh'}
-              </button>
+              <div className="flex items-center gap-4">
+                <button
+                  onClick={loadStats}
+                  disabled={statsLoading}
+                  className="text-sm text-zinc-500 hover:text-zinc-300 transition-colors"
+                >
+                  {statsLoading ? 'Refreshing...' : 'Refresh'}
+                </button>
+                <button
+                  onClick={handleReset}
+                  disabled={resetLoading}
+                  className="text-sm text-red-500 hover:text-red-400 transition-colors"
+                >
+                  {resetLoading ? 'Resetting...' : 'Reset'}
+                </button>
+              </div>
             </div>
 
             {stats ? (
