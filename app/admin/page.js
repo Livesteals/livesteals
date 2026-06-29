@@ -647,19 +647,21 @@ export default function AdminPage() {
               </button>
             </div>
 
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-              {['revenue', 'earnings', 'expense', 'payout'].map(t => (
+            <div className="grid grid-cols-3 gap-3">
+              {['revenue', 'expense'].map(t => (
                 <div key={t} className="bg-zinc-900 border border-zinc-800 rounded-2xl p-4">
-                  <p className={`text-2xl font-bold ${
-                    t === 'revenue' ? 'text-green-400' :
-                    t === 'earnings' ? 'text-amber-400' :
-                    t === 'expense' ? 'text-red-400' : 'text-zinc-300'
-                  }`}>
+                  <p className={`text-2xl font-bold ${t === 'revenue' ? 'text-green-400' : 'text-red-400'}`}>
                     ${(financeTotals[t] || 0).toFixed(2)}
                   </p>
                   <p className="text-zinc-600 text-xs mt-1 leading-tight">{financeLabels[t]}</p>
                 </div>
               ))}
+              <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-4">
+                <p className={`text-2xl font-bold ${((financeTotals.revenue || 0) - (financeTotals.expense || 0)) >= 0 ? 'text-amber-400' : 'text-red-400'}`}>
+                  ${((financeTotals.revenue || 0) - (financeTotals.expense || 0)).toFixed(2)}
+                </p>
+                <p className="text-zinc-600 text-xs mt-1 leading-tight">Total</p>
+              </div>
             </div>
 
             <form onSubmit={handleAddFinance} className="bg-zinc-900 border border-zinc-800 rounded-xl p-4 space-y-3">
@@ -673,9 +675,7 @@ export default function AdminPage() {
                     className="w-full bg-black border border-zinc-800 rounded-lg px-3 py-2.5 text-white text-sm focus:outline-none focus:border-amber-500 transition-colors"
                   >
                     <option value="revenue">Revenue</option>
-                    <option value="earnings">Estimated Earnings</option>
                     <option value="expense">Expense</option>
-                    <option value="payout">Payout</option>
                   </select>
                 </div>
                 {financeType === 'expense' ? (
@@ -747,7 +747,7 @@ export default function AdminPage() {
             </form>
 
             <div className="flex gap-2 overflow-x-auto">
-              {['all', 'revenue', 'earnings', 'expense', 'payout'].map(f => (
+              {['all', 'revenue', 'expense'].map(f => (
                 <button
                   key={f}
                   onClick={() => setFinanceFilter(f)}
