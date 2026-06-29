@@ -46,6 +46,16 @@ export default function AdminPage() {
 
   const [resetLoading, setResetLoading] = useState(false)
 
+  const [financeEntries, setFinanceEntries] = useState([])
+  const [financeLoading, setFinanceLoading] = useState(false)
+  const [financeType, setFinanceType] = useState('revenue')
+  const [financeCategory, setFinanceCategory] = useState('gift_cards')
+  const [financeAmount, setFinanceAmount] = useState('')
+  const [financeNote, setFinanceNote] = useState('')
+  const [financeDate, setFinanceDate] = useState(() => new Date().toISOString().slice(0, 10))
+  const [financeSaving, setFinanceSaving] = useState(false)
+  const [financeFilter, setFinanceFilter] = useState('all')
+
   useEffect(() => {
     const saved = localStorage.getItem('ls_pw')
     if (!saved) return
@@ -62,6 +72,7 @@ export default function AdminPage() {
     if (!authed) return
     if (activeTab === 'overview') loadStats()
     if (activeTab === 'claims') loadClaims()
+    if (activeTab === 'finance') loadFinance()
   }, [activeTab, authed])
 
   async function handleLogin(e) {
@@ -240,6 +251,67 @@ export default function AdminPage() {
     setTimeout(() => setResendDone(null), 3000)
   }
 
+  async function loadFinance() {
+    setFinanceLoading(true)
+    const res = await adminFetch('/api/admin/finance')
+    if (res.ok) { const d = await res.json(); setFinanceEntries(d.entries || []) }
+    setFinanceLoading(false)
+  }
+
+  async function handleAddFinance(e) {
+    e.preventDefault()
+    if (!financeAmount || Number(financeAmount) <= 0) return
+    setFinanceSaving(true)
+    try {
+      const res = await adminFetch('/api/admin/finance', {
+        method: 'POST',
+        body: JSON.stringify({
+          entryType: financeType,
+          category: financeType === 'expense' ? financeCategory : null,
+          amount: financeAmount,
+          note: financeNote,
+          entryDate: financeDate,
+        }),
+      })
+      if (res.ok) {
+        setFinanceAmount('')
+        setFinanceNote('')
+        loadFinance()
+      }
+    } finally {
+      setFinanceSaving(false)
+    }
+  }
+
+  async function handleDeleteFinance(id) {
+    if (!window.confirm('Delete this entry?')) return
+    await adminFetch(`/api/admin/finance/${id}`, { method: 'DELETE' })
+    setFinanceEntries(prev => prev.filter(e => e.id !== id))
+  }
+
+  const financeTotals = financeEntries.reduce((acc, e) => {
+    acc[e.entry_type] = (acc[e.entry_type] || 0) + Number(e.amount)
+    return acc
+  }, {})
+
+  const financeLabels = {
+    revenue: 'Revenue',
+    earnings: 'Est. Earnings',
+    expense: 'Expenses',
+    payout: 'Payouts',
+  }
+
+  const categoryLabels = {
+    gift_cards: 'Gift Cards',
+    shipping: 'Shipping',
+    fees: 'Whatnot Fees',
+    other: 'Other',
+  }
+
+  const visibleFinanceEntries = financeFilter === 'all'
+    ? financeEntries
+    : financeEntries.filter(e => e.entry_type === financeFilter)
+
   if (!authed) {
     return (
       <div className="min-h-screen flex items-center justify-center p-6">
@@ -285,6 +357,7 @@ export default function AdminPage() {
           { key: 'codes', label: 'Add Codes' },
           { key: 'generate', label: 'Generate Cards' },
           { key: 'claims', label: 'All Claims' },
+          { key: 'finance', label: 'Finance' },
         ].map(tab => (
           <button
             key={tab.key}
@@ -558,6 +631,174 @@ export default function AdminPage() {
                         </button>
                       )}
                     </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {activeTab === 'finance' && (
+          <div className="space-y-6">
+            <div className="flex items-center justify-between">
+              <h2 className="text-xl font-bold">Finance</h2>
+              <button onClick={loadFinance} className="text-sm text-zinc-500 hover:text-zinc-300 transition-colors">
+                Refresh
+              </button>
+            </div>
+
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              {['revenue', 'earnings', 'expense', 'payout'].map(t => (
+                <div key={t} className="bg-zinc-900 border border-zinc-800 rounded-2xl p-4">
+                  <p className={`text-2xl font-bold ${
+                    t === 'revenue' ? 'text-green-400' :
+                    t === 'earnings' ? 'text-amber-400' :
+                    t === 'expense' ? 'text-red-400' : 'text-zinc-300'
+                  }`}>
+                    ${(financeTotals[t] || 0).toFixed(2)}
+                  </p>
+                  <p className="text-zinc-600 text-xs mt-1 leading-tight">{financeLabels[t]}</p>
+                </div>
+              ))}
+            </div>
+
+            <form onSubmit={handleAddFinance} className="bg-zinc-900 border border-zinc-800 rounded-xl p-4 space-y-3">
+              <p className="text-sm font-semibold text-zinc-300">Add Entry</p>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs text-zinc-500 mb-1.5">Type</label>
+                  <select
+                    value={financeType}
+                    onChange={e => setFinanceType(e.target.value)}
+                    className="w-full bg-black border border-zinc-800 rounded-lg px-3 py-2.5 text-white text-sm focus:outline-none focus:border-amber-500 transition-colors"
+                  >
+                    <option value="revenue">Revenue</option>
+                    <option value="earnings">Estimated Earnings</option>
+                    <option value="expense">Expense</option>
+                    <option value="payout">Payout</option>
+                  </select>
+                </div>
+                {financeType === 'expense' ? (
+                  <div>
+                    <label className="block text-xs text-zinc-500 mb-1.5">Category</label>
+                    <select
+                      value={financeCategory}
+                      onChange={e => setFinanceCategory(e.target.value)}
+                      className="w-full bg-black border border-zinc-800 rounded-lg px-3 py-2.5 text-white text-sm focus:outline-none focus:border-amber-500 transition-colors"
+                    >
+                      <option value="gift_cards">Gift Cards</option>
+                      <option value="shipping">Shipping</option>
+                      <option value="fees">Whatnot Fees</option>
+                      <option value="other">Other</option>
+                    </select>
+                  </div>
+                ) : (
+                  <div>
+                    <label className="block text-xs text-zinc-500 mb-1.5">Date</label>
+                    <input
+                      type="date"
+                      value={financeDate}
+                      onChange={e => setFinanceDate(e.target.value)}
+                      className="w-full bg-black border border-zinc-800 rounded-lg px-3 py-2.5 text-white text-sm focus:outline-none focus:border-amber-500 transition-colors"
+                    />
+                  </div>
+                )}
+              </div>
+              {financeType === 'expense' && (
+                <div>
+                  <label className="block text-xs text-zinc-500 mb-1.5">Date</label>
+                  <input
+                    type="date"
+                    value={financeDate}
+                    onChange={e => setFinanceDate(e.target.value)}
+                    className="w-full bg-black border border-zinc-800 rounded-lg px-3 py-2.5 text-white text-sm focus:outline-none focus:border-amber-500 transition-colors"
+                  />
+                </div>
+              )}
+              <div>
+                <label className="block text-xs text-zinc-500 mb-1.5">Amount ($)</label>
+                <input
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  value={financeAmount}
+                  onChange={e => setFinanceAmount(e.target.value)}
+                  placeholder="0.00"
+                  className="w-full bg-black border border-zinc-800 rounded-lg px-3 py-2.5 text-white placeholder-zinc-700 text-sm focus:outline-none focus:border-amber-500 transition-colors"
+                />
+              </div>
+              <div>
+                <label className="block text-xs text-zinc-500 mb-1.5">Note <span className="text-zinc-700">optional</span></label>
+                <input
+                  type="text"
+                  value={financeNote}
+                  onChange={e => setFinanceNote(e.target.value)}
+                  placeholder="e.g. June 28 stream"
+                  className="w-full bg-black border border-zinc-800 rounded-lg px-3 py-2.5 text-white placeholder-zinc-700 text-sm focus:outline-none focus:border-amber-500 transition-colors"
+                />
+              </div>
+              <button
+                type="submit"
+                disabled={financeSaving || !financeAmount}
+                className="w-full py-2.5 rounded-lg bg-amber-500 hover:bg-amber-400 disabled:bg-zinc-800 disabled:text-zinc-600 text-black font-bold text-sm transition-colors"
+              >
+                {financeSaving ? 'Saving...' : 'Add Entry'}
+              </button>
+            </form>
+
+            <div className="flex gap-2 overflow-x-auto">
+              {['all', 'revenue', 'earnings', 'expense', 'payout'].map(f => (
+                <button
+                  key={f}
+                  onClick={() => setFinanceFilter(f)}
+                  className={`px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-colors ${
+                    financeFilter === f ? 'bg-amber-500 text-black' : 'bg-zinc-900 text-zinc-500 hover:text-zinc-300'
+                  }`}
+                >
+                  {f === 'all' ? 'All' : financeLabels[f]}
+                </button>
+              ))}
+            </div>
+
+            {financeLoading ? (
+              <div className="space-y-2">
+                {[0,1,2].map(i => (
+                  <div key={i} className="bg-zinc-900 border border-zinc-800 rounded-2xl p-4 animate-pulse">
+                    <div className="h-4 w-24 bg-zinc-800 rounded mb-2" />
+                    <div className="h-3 w-40 bg-zinc-800 rounded" />
+                  </div>
+                ))}
+              </div>
+            ) : visibleFinanceEntries.length === 0 ? (
+              <p className="text-zinc-600 py-8 text-center">No entries yet.</p>
+            ) : (
+              <div className="space-y-2">
+                {visibleFinanceEntries.map(entry => (
+                  <div key={entry.id} className="bg-zinc-900 border border-zinc-800 rounded-2xl p-4 flex items-start justify-between gap-4">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex flex-wrap items-center gap-2 mb-1">
+                        <span className={`inline-block px-2.5 py-0.5 rounded-full text-xs font-semibold ${
+                          entry.entry_type === 'revenue' ? 'bg-green-500/15 text-green-400' :
+                          entry.entry_type === 'earnings' ? 'bg-amber-500/15 text-amber-400' :
+                          entry.entry_type === 'expense' ? 'bg-red-500/15 text-red-400' :
+                          'bg-zinc-500/15 text-zinc-300'
+                        }`}>
+                          {financeLabels[entry.entry_type]}
+                        </span>
+                        {entry.category && (
+                          <span className="text-zinc-700 text-xs">{categoryLabels[entry.category] || entry.category}</span>
+                        )}
+                      </div>
+                      <p className="text-lg font-bold text-white">${Number(entry.amount).toFixed(2)}</p>
+                      {entry.note && <p className="text-sm text-zinc-400 truncate">{entry.note}</p>}
+                      <p className="text-xs text-zinc-700 mt-1">{entry.entry_date}</p>
+                    </div>
+                    <button
+                      onClick={() => handleDeleteFinance(entry.id)}
+                      className="shrink-0 text-xs text-zinc-600 hover:text-red-400 transition-colors"
+                    >
+                      Delete
+                    </button>
                   </div>
                 ))}
               </div>

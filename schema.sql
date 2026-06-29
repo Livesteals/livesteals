@@ -62,3 +62,17 @@ BEGIN
   RETURN QUERY SELECT true, v_code.code, 'success';
 END;
 $$;
+
+-- Finance tracking: revenue, estimated earnings, expenses, and payouts
+CREATE TABLE IF NOT EXISTS finance_entries (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  entry_type TEXT NOT NULL CHECK (entry_type IN ('revenue', 'earnings', 'expense', 'payout')),
+  category TEXT,
+  amount NUMERIC NOT NULL,
+  note TEXT,
+  entry_date DATE NOT NULL DEFAULT CURRENT_DATE,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS finance_entries_type_idx ON finance_entries(entry_type);
+CREATE INDEX IF NOT EXISTS finance_entries_date_idx ON finance_entries(entry_date);
