@@ -454,7 +454,7 @@ async function generatePDF(tokens, batchLabel) {
     doc.setFont('helvetica', 'bold')
     doc.setFontSize(13)
     doc.setTextColor(0, 0, 0)
-    doc.text('$5 Amazon Gift Card!', 2, 1.35, { align: 'center' })
+    doc.text('Amazon Gift Card!', 2, 1.35, { align: 'center' })
 
     // QR Code — smaller, centered
     doc.addImage(qrDataUrl, 'PNG', 0.75, 1.55, 2.5, 2.5)

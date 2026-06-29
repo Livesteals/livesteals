@@ -87,7 +87,7 @@ export default function ClaimClient({ token }) {
           <p className="text-amber-500 text-xs font-bold tracking-widest uppercase mb-3">LIVE STEALS</p>
           <h1 className="text-3xl font-bold mb-3">Claim Your Gift Card</h1>
           <p className="text-zinc-400 leading-relaxed">
-            Enter your email to receive your $5 Amazon gift card code instantly.
+            Enter your email to receive your Amazon gift card code instantly.
           </p>
         </div>
 

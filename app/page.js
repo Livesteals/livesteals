@@ -41,7 +41,7 @@ export default function Home() {
         </div>
 
         <h1 className="text-6xl md:text-8xl font-black tracking-tight leading-none mb-6">
-          Win a <span className="text-amber-400">$5 Amazon</span><br />Gift Card
+          Win an <span className="text-amber-400">Amazon</span><br />Gift Card
         </h1>
 
         <p className="text-xl text-zinc-500 max-w-xl mx-auto mb-10 leading-relaxed">
@@ -69,7 +69,7 @@ export default function Home() {
         <div className="max-w-3xl mx-auto grid grid-cols-3 gap-8 text-center">
           {[
             { value: '30–40', label: 'Cards Per Stream' },
-            { value: '$5', label: 'Amazon Gift Cards' },
+            { value: 'Amazon', label: 'Gift Cards' },
             { value: '100%', label: 'Free to Win' },
           ].map(s => (
             <div key={s.label}>
