@@ -2,14 +2,20 @@
 import { useRef } from 'react'
 import { Canvas, useFrame } from '@react-three/fiber'
 
+if (typeof window !== 'undefined') {
+  window.__giftCardDebug = { mounted: true, onCreatedFired: false, frameCount: 0 }
+}
+
 function Card() {
   const group = useRef()
-  const logged = useRef(false)
 
   useFrame((state, delta) => {
-    if (!logged.current) {
-      logged.current = true
-      console.log('[GiftCard3D] useFrame is running', { delta, groupExists: !!group.current })
+    if (typeof window !== 'undefined') {
+      window.__giftCardDebug.frameCount++
+      window.__giftCardDebug.lastDelta = delta
+      window.__giftCardDebug.groupExists = !!group.current
+      window.__giftCardDebug.cameraPos = state.camera.position.toArray()
+      window.__giftCardDebug.sceneChildren = state.scene.children.length
     }
     if (!group.current) return
     const t = state.clock.getElapsedTime()
@@ -36,10 +42,11 @@ export default function GiftCard3D() {
       camera={{ position: [0, 0, 4.2], fov: 35 }}
       dpr={[1, 1.5]}
       onCreated={(state) => {
-        console.log('[GiftCard3D] onCreated fired', {
-          rendererExists: !!state.gl,
-          sceneChildren: state.scene.children.length,
-        })
+        if (typeof window !== 'undefined') {
+          window.__giftCardDebug.onCreatedFired = true
+          window.__giftCardDebug.rendererExists = !!state.gl
+          window.__giftCardDebug.canvasSize = [state.size.width, state.size.height]
+        }
       }}
     >
       <ambientLight intensity={0.7} />
