@@ -18,7 +18,7 @@ export async function POST(request) {
   const payload = await request.json()
   const attachments = payload.Attachments || []
 
-  const pdfParse = (await import('pdf-parse')).default
+  const pdfParse = (await import('pdf-parse/lib/pdf-parse.js')).default
   const foundCodes = new Set()
 
   for (const att of attachments) {
