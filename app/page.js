@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import ClaimPopup from './ClaimPopup'
 
 export default function Home() {
   return (
@@ -18,6 +19,7 @@ export default function Home() {
           >
             Whatnot
           </a>
+          <ClaimPopup />
           <a
             href="https://www.whatnot.com/s/WZZ45wou"
             target="_blank"
