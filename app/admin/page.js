@@ -26,6 +26,10 @@ export default function AdminPage() {
   const [addLoading, setAddLoading] = useState(false)
   const [addResult, setAddResult] = useState(null)
 
+  const [ocrLoading, setOcrLoading] = useState(false)
+  const [ocrProgress, setOcrProgress] = useState('')
+  const [ocrIssues, setOcrIssues] = useState([])
+
   const [genQty, setGenQty] = useState(10)
   const [genBatch, setGenBatch] = useState('')
   const [genLoading, setGenLoading] = useState(false)
@@ -102,6 +106,43 @@ export default function AdminPage() {
     } finally {
       setAddLoading(false)
     }
+  }
+
+  async function handleExtractCodes(files) {
+    if (!files || files.length === 0) return
+    setOcrLoading(true)
+    setOcrIssues([])
+
+    const Tesseract = (await import('tesseract.js')).default
+    const codeRegex = /\b[A-Z0-9]{3,8}-[A-Z0-9]{3,8}-[A-Z0-9]{3,8}\b/gi
+
+    const foundCodes = []
+    const issues = []
+
+    for (let i = 0; i < files.length; i++) {
+      setOcrProgress(`Reading image ${i + 1} of ${files.length}...`)
+      try {
+        const { data } = await Tesseract.recognize(files[i], 'eng')
+        const matches = data.text.match(codeRegex)
+        if (matches && matches.length > 0) {
+          foundCodes.push(matches[0].toUpperCase())
+        } else {
+          issues.push(files[i].name)
+        }
+      } catch {
+        issues.push(files[i].name)
+      }
+    }
+
+    setCodesInput(prev => {
+      const existing = prev.trim()
+      const added = foundCodes.join('\n')
+      if (!added) return prev
+      return existing ? `${existing}\n${added}` : added
+    })
+    setOcrIssues(issues)
+    setOcrProgress('')
+    setOcrLoading(false)
   }
 
   async function handleGenerate(e) {
@@ -287,9 +328,36 @@ export default function AdminPage() {
           <div className="space-y-6 max-w-lg">
             <div>
               <h2 className="text-xl font-bold mb-1">Add Gift Card Codes</h2>
-              <p className="text-zinc-500 text-sm">Paste your Amazon gift card codes — one per line.</p>
+              <p className="text-zinc-500 text-sm">Paste codes, or upload the gift card images Amazon emails you and we'll read the codes off them.</p>
             </div>
+
+            <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-4 space-y-3">
+              <label className="block">
+                <span className="block text-sm text-zinc-400 mb-2">Upload gift card images</span>
+                <input
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  disabled={ocrLoading}
+                  onChange={e => handleExtractCodes(e.target.files)}
+                  className="w-full text-sm text-zinc-400 file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-amber-500 file:text-black file:font-bold file:text-sm hover:file:bg-amber-400 file:cursor-pointer disabled:opacity-50"
+                />
+              </label>
+              {ocrLoading && (
+                <p className="text-sm text-amber-400">{ocrProgress || 'Reading images...'}</p>
+              )}
+              {!ocrLoading && ocrIssues.length > 0 && (
+                <div className="text-sm text-red-400">
+                  <p className="font-semibold mb-1">Couldn't read a code from {ocrIssues.length} file{ocrIssues.length !== 1 ? 's' : ''} — add manually:</p>
+                  <ul className="list-disc list-inside text-red-400/70">
+                    {ocrIssues.map(name => <li key={name}>{name}</li>)}
+                  </ul>
+                </div>
+              )}
+            </div>
+
             <form onSubmit={handleAddCodes} className="space-y-4">
+              <p className="text-zinc-500 text-sm">Review the codes below before adding — OCR can make mistakes.</p>
               <textarea
                 value={codesInput}
                 onChange={e => setCodesInput(e.target.value)}
