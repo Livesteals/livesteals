@@ -1,5 +1,6 @@
 'use client'
 import { useState, useEffect } from 'react'
+import { pickCode, pickAllCodes } from '../../lib/extractCode'
 
 function adminFetch(url, options = {}) {
   const pw = typeof window !== 'undefined' ? localStorage.getItem('ls_pw') : ''
@@ -111,47 +112,18 @@ export default function AdminPage() {
     }
   }
 
-  const CODE_REGEX = /\b[A-Z0-9]{3,8}-[A-Z0-9]{3,8}-[A-Z0-9]{3,8}\b/gi
-
-  function pickCode(text) {
-    const matches = text.match(CODE_REGEX) || []
-    // Prefer matches with letters — pure-digit groups are usually order/serial numbers, not claim codes.
-    return matches.find(m => /[A-Z]/i.test(m)) || null
-  }
-
-  function pickAllCodes(text) {
-    const matches = text.match(CODE_REGEX) || []
-    return [...new Set(matches.filter(m => /[A-Z]/i.test(m)).map(m => m.toUpperCase()))]
-  }
-
-  async function extractFromPdf(file, Tesseract) {
-    const pdfjsLib = await import('pdfjs-dist/build/pdf')
-    pdfjsLib.GlobalWorkerOptions.workerSrc =
-      'https://unpkg.com/pdfjs-dist@3.11.174/build/pdf.worker.min.js'
-
-    const arrayBuffer = await file.arrayBuffer()
-    const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise
-
-    let fullText = ''
-    for (let p = 1; p <= pdf.numPages; p++) {
-      const page = await pdf.getPage(p)
-      const textContent = await page.getTextContent()
-      fullText += textContent.items.map(it => it.str).join(' ') + '\n'
-    }
-
-    const code = pickCode(fullText)
-    if (code) return code
-
-    // No selectable text (likely a scanned/image PDF) — render to canvas and OCR it.
-    const page = await pdf.getPage(1)
-    const viewport = page.getViewport({ scale: 2 })
-    const canvas = document.createElement('canvas')
-    canvas.width = viewport.width
-    canvas.height = viewport.height
-    await page.render({ canvasContext: canvas.getContext('2d'), viewport }).promise
-
-    const { data } = await Tesseract.recognize(canvas, 'eng')
-    return pickCode(data.text)
+  async function extractFromPdf(file) {
+    const pw = localStorage.getItem('ls_pw') || ''
+    const formData = new FormData()
+    formData.append('file', file)
+    const res = await fetch('/api/admin/extract-pdf', {
+      method: 'POST',
+      headers: { 'x-admin-password': pw },
+      body: formData,
+    })
+    if (!res.ok) return null
+    const data = await res.json()
+    return data.code || null
   }
 
   async function handleExtractCodes(files) {
@@ -170,7 +142,7 @@ export default function AdminPage() {
         let code = null
         const isPdf = files[i].type === 'application/pdf' || files[i].name.toLowerCase().endsWith('.pdf')
         if (isPdf) {
-          code = await extractFromPdf(files[i], Tesseract)
+          code = await extractFromPdf(files[i])
         } else {
           const { data } = await Tesseract.recognize(files[i], 'eng')
           code = pickCode(data.text)

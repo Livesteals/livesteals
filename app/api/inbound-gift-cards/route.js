@@ -1,13 +1,6 @@
 import { supabase } from '../../../lib/supabase'
+import { pickAllCodes } from '../../../lib/extractCode'
 import { NextResponse } from 'next/server'
-
-const CODE_REGEX = /\b[A-Z0-9]{3,8}-[A-Z0-9]{3,8}-[A-Z0-9]{3,8}\b/gi
-
-function extractCodesFromText(text) {
-  const matches = text.match(CODE_REGEX) || []
-  // Prefer matches with letters — pure-digit groups are usually order/serial numbers, not claim codes.
-  return matches.filter(m => /[A-Z]/i.test(m)).map(m => m.toUpperCase())
-}
 
 export async function POST(request) {
   const { searchParams } = new URL(request.url)
@@ -26,7 +19,7 @@ export async function POST(request) {
     try {
       const buffer = Buffer.from(att.Content, 'base64')
       const { text } = await pdfParse(buffer)
-      extractCodesFromText(text).forEach(code => foundCodes.add(code))
+      pickAllCodes(text).forEach(code => foundCodes.add(code))
     } catch {
       // skip unreadable attachment
     }
