@@ -2,7 +2,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 
-export default function ClaimPopup({ trigger }) {
+export default function ClaimPopup({ trigger, className }) {
   const [open, setOpen] = useState(false)
   const [code, setCode] = useState('')
   const [error, setError] = useState('')
@@ -22,7 +22,7 @@ export default function ClaimPopup({ trigger }) {
     <>
       <button
         onClick={() => setOpen(true)}
-        className="text-sm font-bold px-4 py-2 border border-amber-400/40 hover:border-amber-400 text-amber-400 rounded-lg transition-colors"
+        className={className || 'text-sm font-bold px-4 py-2 border border-amber-400/40 hover:border-amber-400 text-amber-400 rounded-lg transition-colors'}
       >
         {trigger || 'Claim Gift Card'}
       </button>

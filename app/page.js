@@ -1,81 +1,13 @@
 import Link from 'next/link'
 import Image from 'next/image'
-import ClaimPopup from './ClaimPopup'
-import GiftCard3D from './GiftCard3DWrapper'
+import CameraHero from './CameraHero'
 
 export default function Home() {
   return (
     <div className="min-h-screen bg-black text-zinc-100">
 
-      {/* Nav */}
-      <nav className="flex items-center justify-between px-8 py-4 bg-black border-b border-red-900/40">
-        <Image src="/logo.jpg" alt="LIVE STEALS" width={44} height={44} className="rounded-lg" priority />
-        <div className="flex items-center gap-6">
-          <a
-            href="https://www.whatnot.com/s/WZZ45wou"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-sm font-semibold text-zinc-500 hover:text-white transition-colors"
-          >
-            Whatnot
-          </a>
-          <ClaimPopup />
-          <a
-            href="https://www.whatnot.com/s/WZZ45wou"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-sm font-bold px-4 py-2 bg-gradient-to-b from-amber-300 to-amber-500 hover:from-amber-200 hover:to-amber-400 text-black rounded-lg transition-colors"
-          >
-            Watch Live
-          </a>
-        </div>
-      </nav>
-
-      {/* Hero */}
-      <section className="relative px-8 pt-20 pb-28 text-center overflow-hidden bg-gradient-to-br from-red-700 via-red-800 to-red-950">
-        {/* geometric corner accents */}
-        <div className="absolute top-0 left-0 w-40 h-40 bg-black/40 -translate-x-1/2 -translate-y-1/2 rotate-45" />
-        <div className="absolute top-0 right-0 w-56 h-56 bg-black/30 translate-x-1/3 -translate-y-1/3 rotate-45" />
-        <div className="absolute bottom-0 left-1/4 w-72 h-72 bg-black/20 translate-y-1/2 rotate-45" />
-
-        <div className="relative max-w-6xl mx-auto flex flex-col lg:flex-row items-center gap-8 lg:gap-4">
-          <div className="flex-1 text-center lg:text-left">
-            <div className="inline-flex items-center gap-2 bg-black text-white text-xs font-bold px-4 py-2 rounded-full mb-8 uppercase tracking-widest">
-              <span className="w-2 h-2 bg-red-500 rounded-full animate-pulse inline-block"></span>
-              Now Live on Whatnot
-            </div>
-
-            <h1 className="text-5xl md:text-7xl font-black tracking-tight leading-[1.05] mb-6 text-white [text-shadow:0_1px_0_#8a1818,0_2px_0_#7a1515,0_3px_0_#6a1212,0_4px_0_#5a0f0f,0_8px_12px_rgba(0,0,0,0.5)]">
-              Win an<br />
-              <span className="bg-gradient-to-b from-amber-200 via-amber-400 to-amber-600 bg-clip-text text-transparent [filter:drop-shadow(0_2px_0_rgba(120,70,0,0.6))_drop-shadow(0_4px_0_rgba(90,50,0,0.6))_drop-shadow(0_10px_14px_rgba(0,0,0,0.45))]">
-                Amazon Gift Card
-              </span>
-            </h1>
-
-            <p className="text-lg text-red-100 max-w-xl mx-auto lg:mx-0 mb-10 leading-relaxed">
-              Join a LIVESTEALS stream on Whatnot, win a giveaway, and claim your code the moment your card arrives in the mail.
-            </p>
-
-            <a
-              href="https://www.whatnot.com/s/WZZ45wou"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-3 px-10 py-4 bg-gradient-to-b from-amber-300 to-amber-500 hover:from-amber-200 hover:to-amber-400 text-black font-black text-lg rounded-2xl transition-colors shadow-xl shadow-black/30"
-            >
-              <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M8 5v14l11-7z"/>
-              </svg>
-              Watch Live on Whatnot
-            </a>
-
-            <p className="text-red-200/70 text-sm mt-5">Free to join. No purchase necessary.</p>
-          </div>
-
-          <div className="w-full max-w-sm h-72 lg:h-96 lg:flex-1 shrink-0">
-            <GiftCard3D />
-          </div>
-        </div>
-      </section>
+      {/* Full-screen splash hero */}
+      <CameraHero />
 
       {/* Stats */}
       <section className="border-b border-red-900/40 py-14 px-4 sm:px-8 bg-black">
@@ -94,7 +26,7 @@ export default function Home() {
       </section>
 
       {/* How it works */}
-      <section className="max-w-5xl mx-auto px-8 py-24 bg-black">
+      <section id="how" className="max-w-5xl mx-auto px-8 py-24 bg-black scroll-mt-8">
         <div className="text-center mb-16">
           <h2 className="text-4xl font-black text-white mb-3">How It Works</h2>
           <p className="text-zinc-500">Simple. Fast. Free.</p>
