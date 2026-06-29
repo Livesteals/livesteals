@@ -154,7 +154,8 @@ export default function AdminPage() {
       setOcrProgress(`Reading file ${i + 1} of ${files.length}...`)
       try {
         let code = null
-        if (files[i].type === 'application/pdf') {
+        const isPdf = files[i].type === 'application/pdf' || files[i].name.toLowerCase().endsWith('.pdf')
+        if (isPdf) {
           code = await extractFromPdf(files[i], Tesseract, codeRegex)
         } else {
           const { data } = await Tesseract.recognize(files[i], 'eng')
@@ -373,7 +374,6 @@ export default function AdminPage() {
                 <span className="block text-sm text-zinc-400 mb-2">Upload gift card images or PDFs</span>
                 <input
                   type="file"
-                  accept="image/*,.pdf,application/pdf"
                   multiple
                   disabled={ocrLoading}
                   onChange={e => handleExtractCodes(e.target.files)}
