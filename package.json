@@ -1,0 +1,22 @@
+{
+  "name": "livesteals",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start"
+  },
+  "dependencies": {
+    "next": "15.3.3",
+    "@supabase/supabase-js": "^2.43.4",
+    "resend": "^3.2.0",
+    "qrcode": "^1.5.3",
+    "jspdf": "^2.5.1"
+  },
+  "devDependencies": {
+    "tailwindcss": "^3.4.4",
+    "autoprefixer": "^10.4.19",
+    "postcss": "^8.4.39"
+  }
+}
