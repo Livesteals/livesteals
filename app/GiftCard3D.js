@@ -2,6 +2,50 @@
 import { useEffect, useRef } from 'react'
 import * as THREE from 'three'
 
+function makeCardTexture() {
+  const canvas = document.createElement('canvas')
+  canvas.width = 1024
+  canvas.height = 640
+  const ctx = canvas.getContext('2d')
+
+  const bg = ctx.createLinearGradient(0, 0, canvas.width, canvas.height)
+  bg.addColorStop(0, '#b91c1c')
+  bg.addColorStop(1, '#450a0a')
+  ctx.fillStyle = bg
+  ctx.fillRect(0, 0, canvas.width, canvas.height)
+
+  ctx.fillStyle = 'rgba(0,0,0,0.25)'
+  ctx.beginPath()
+  ctx.moveTo(canvas.width, 0)
+  ctx.lineTo(canvas.width, 220)
+  ctx.lineTo(canvas.width - 220, 0)
+  ctx.closePath()
+  ctx.fill()
+
+  ctx.font = 'bold 64px Arial'
+  ctx.fillStyle = '#ffffff'
+  ctx.textBaseline = 'top'
+  ctx.fillText('LIVE', 60, 60)
+  ctx.fillStyle = '#fbbf24'
+  ctx.fillText('STEALS', 60 + ctx.measureText('LIVE').width + 10, 60)
+
+  const goldGrad = ctx.createLinearGradient(60, 280, 60, 420)
+  goldGrad.addColorStop(0, '#fde68a')
+  goldGrad.addColorStop(1, '#d97706')
+  ctx.fillStyle = goldGrad
+  ctx.font = 'bold 88px Arial'
+  ctx.fillText('Amazon', 60, 280)
+  ctx.fillText('Gift Card', 60, 380)
+
+  ctx.font = 'bold 36px Arial'
+  ctx.fillStyle = 'rgba(255,255,255,0.5)'
+  ctx.fillText('livesteals.co', 60, 540)
+
+  const texture = new THREE.CanvasTexture(canvas)
+  texture.colorSpace = THREE.SRGBColorSpace
+  return texture
+}
+
 export default function GiftCard3D() {
   const containerRef = useRef(null)
 
@@ -30,10 +74,23 @@ export default function GiftCard3D() {
     scene.add(pointLight)
 
     const group = new THREE.Group()
-    const geometry = new THREE.BoxGeometry(2.2, 1.4, 0.08)
-    const material = new THREE.MeshStandardMaterial({ color: 0xcaa23a, metalness: 0.7, roughness: 0.35 })
-    const mesh = new THREE.Mesh(geometry, material)
-    group.add(mesh)
+
+    const sideMaterial = new THREE.MeshStandardMaterial({ color: 0xcaa23a, metalness: 0.7, roughness: 0.35 })
+    const body = new THREE.Mesh(new THREE.BoxGeometry(2.2, 1.4, 0.08), sideMaterial)
+    group.add(body)
+
+    const frontTexture = makeCardTexture()
+    const frontMaterial = new THREE.MeshStandardMaterial({ map: frontTexture, metalness: 0.1, roughness: 0.5 })
+    const front = new THREE.Mesh(new THREE.PlaneGeometry(2.1, 1.3125), frontMaterial)
+    front.position.z = 0.045
+    group.add(front)
+
+    const backMaterial = new THREE.MeshStandardMaterial({ color: 0x1a1a1a, metalness: 0.6, roughness: 0.4 })
+    const back = new THREE.Mesh(new THREE.PlaneGeometry(2.1, 1.3125), backMaterial)
+    back.position.z = -0.045
+    back.rotation.y = Math.PI
+    group.add(back)
+
     scene.add(group)
 
     let raf
@@ -73,8 +130,13 @@ export default function GiftCard3D() {
       cancelAnimationFrame(raf)
       window.removeEventListener('pointermove', onPointerMove)
       window.removeEventListener('resize', onResize)
-      geometry.dispose()
-      material.dispose()
+      body.geometry.dispose()
+      front.geometry.dispose()
+      back.geometry.dispose()
+      sideMaterial.dispose()
+      frontMaterial.dispose()
+      backMaterial.dispose()
+      frontTexture.dispose()
       renderer.dispose()
       if (container.contains(renderer.domElement)) {
         container.removeChild(renderer.domElement)
