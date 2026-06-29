@@ -304,6 +304,7 @@ export default function AdminPage() {
   const categoryLabels = {
     gift_cards: 'Giftcards',
     items: 'Items',
+    other: 'Other',
   }
 
   const visibleFinanceEntries = financeFilter === 'all'
@@ -686,6 +687,7 @@ export default function AdminPage() {
                     >
                       <option value="gift_cards">Giftcards</option>
                       <option value="items">Items</option>
+                      <option value="other">Other</option>
                     </select>
                   </div>
                 ) : (
