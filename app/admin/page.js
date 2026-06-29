@@ -590,40 +590,45 @@ async function generatePDF(tokens, batchLabel) {
       color: { dark: '#000000', light: '#ffffff' },
     })
 
-    // Congratulations
+    // Headline
     doc.setFont('helvetica', 'bold')
-    doc.setFontSize(11)
+    doc.setFontSize(16)
     doc.setTextColor(0, 0, 0)
-    doc.text('CONGRATULATIONS!', 2, 0.4, { align: 'center' })
+    doc.text('YOU WON A GIVEAWAY!', 2, 0.42, { align: 'center' })
 
     // Title
-    doc.setFontSize(20)
-    doc.setTextColor(0, 0, 0)
-    doc.text('LIVE STEALS', 2, 0.72, { align: 'center' })
+    doc.setFontSize(11)
+    doc.setTextColor(110, 110, 110)
+    doc.text('LIVE STEALS', 2, 0.65, { align: 'center' })
 
     // Divider
     doc.setDrawColor(210, 210, 210)
-    doc.line(0.4, 0.88, 3.6, 0.88)
+    doc.line(0.4, 0.82, 3.6, 0.82)
 
     // Subtitle
     doc.setFont('helvetica', 'normal')
     doc.setFontSize(9)
     doc.setTextColor(110, 110, 110)
-    doc.text("You've won a", 2, 1.1, { align: 'center' })
+    doc.text("This card is proof you won a", 2, 1.05, { align: 'center' })
 
     doc.setFont('helvetica', 'bold')
     doc.setFontSize(13)
     doc.setTextColor(0, 0, 0)
-    doc.text('Amazon Gift Card!', 2, 1.35, { align: 'center' })
+    doc.text('Amazon Gift Card!', 2, 1.3, { align: 'center' })
 
     // QR Code — smaller, centered
-    doc.addImage(qrDataUrl, 'PNG', 0.75, 1.55, 2.5, 2.5)
+    doc.addImage(qrDataUrl, 'PNG', 0.75, 1.5, 2.5, 2.5)
 
-    // Scan instruction
+    // How to claim
+    doc.setFont('helvetica', 'bold')
+    doc.setFontSize(9)
+    doc.setTextColor(0, 0, 0)
+    doc.text('HOW TO CLAIM IT', 2, 4.13, { align: 'center' })
+
     doc.setFont('helvetica', 'normal')
     doc.setFontSize(8)
     doc.setTextColor(100, 100, 100)
-    doc.text('Point your phone camera at the QR code to claim', 2, 4.18, { align: 'center' })
+    doc.text('Point your phone camera at the QR code to claim instantly.', 2, 4.32, { align: 'center' })
 
     // OR divider
     doc.setFontSize(8)
@@ -658,7 +663,14 @@ async function generatePDF(tokens, batchLabel) {
       doc.text(`Batch: ${batchLabel}`, 2, 5.32, { align: 'center' })
     }
 
+    // Expiration
+    doc.setFont('helvetica', 'bold')
+    doc.setFontSize(7.5)
+    doc.setTextColor(0, 0, 0)
+    doc.text('EXPIRES IN 30 DAYS', 2, 5.55, { align: 'center' })
+
     // Footer
+    doc.setFont('helvetica', 'normal')
     doc.setFontSize(8)
     doc.setTextColor(185, 185, 185)
     doc.text('livesteals.co', 2, 5.78, { align: 'center' })
