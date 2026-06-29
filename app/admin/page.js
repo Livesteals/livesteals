@@ -1,6 +1,6 @@
 'use client'
 import { useState, useEffect } from 'react'
-import { pickCode, pickAllCodes } from '../../lib/extractCode'
+import { pickAllCodes } from '../../lib/extractCode'
 
 function adminFetch(url, options = {}) {
   const pw = typeof window !== 'undefined' ? localStorage.getItem('ls_pw') : ''
@@ -121,9 +121,9 @@ export default function AdminPage() {
       headers: { 'x-admin-password': pw },
       body: formData,
     })
-    if (!res.ok) return null
+    if (!res.ok) return []
     const data = await res.json()
-    return data.code || null
+    return data.codes || []
   }
 
   async function handleExtractCodes(files) {
@@ -133,22 +133,22 @@ export default function AdminPage() {
 
     const Tesseract = (await import('tesseract.js')).default
 
-    const foundCodes = []
+    const foundCodes = new Set()
     const issues = []
 
     for (let i = 0; i < files.length; i++) {
       setOcrProgress(`Reading file ${i + 1} of ${files.length}...`)
       try {
-        let code = null
+        let codes = []
         const isPdf = files[i].type === 'application/pdf' || files[i].name.toLowerCase().endsWith('.pdf')
         if (isPdf) {
-          code = await extractFromPdf(files[i])
+          codes = await extractFromPdf(files[i])
         } else {
           const { data } = await Tesseract.recognize(files[i], 'eng')
-          code = pickCode(data.text)
+          codes = pickAllCodes(data.text)
         }
-        if (code) {
-          foundCodes.push(code.toUpperCase())
+        if (codes.length > 0) {
+          codes.forEach(c => foundCodes.add(c.toUpperCase()))
         } else {
           issues.push(files[i].name)
         }
@@ -159,7 +159,7 @@ export default function AdminPage() {
 
     setCodesInput(prev => {
       const existing = prev.trim()
-      const added = foundCodes.join('\n')
+      const added = [...foundCodes].join('\n')
       if (!added) return prev
       return existing ? `${existing}\n${added}` : added
     })

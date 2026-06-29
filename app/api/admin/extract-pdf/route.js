@@ -1,5 +1,5 @@
 import { isAdmin } from '../../../../lib/auth'
-import { pickCode } from '../../../../lib/extractCode'
+import { pickAllCodes } from '../../../../lib/extractCode'
 import { NextResponse } from 'next/server'
 
 export async function POST(request) {
@@ -19,8 +19,8 @@ export async function POST(request) {
 
   try {
     const { text } = await pdfParse(buffer)
-    const code = pickCode(text)
-    return NextResponse.json({ code })
+    const codes = pickAllCodes(text)
+    return NextResponse.json({ codes })
   } catch (e) {
     return NextResponse.json({ error: e.message || 'Could not read PDF' }, { status: 500 })
   }
