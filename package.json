@@ -14,7 +14,9 @@
     "qrcode": "^1.5.3",
     "jspdf": "^2.5.1",
     "tesseract.js": "^5.1.0",
-    "pdf-parse": "^1.1.1"
+    "pdf-parse": "^1.1.1",
+    "three": "^0.169.0",
+    "@react-three/fiber": "^9.0.0"
   },
   "devDependencies": {
     "tailwindcss": "^3.4.4",
