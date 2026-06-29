@@ -30,6 +30,9 @@ export default function AdminPage() {
   const [ocrProgress, setOcrProgress] = useState('')
   const [ocrIssues, setOcrIssues] = useState([])
 
+  const [pasteText, setPasteText] = useState('')
+  const [pasteResult, setPasteResult] = useState(null)
+
   const [genQty, setGenQty] = useState(10)
   const [genBatch, setGenBatch] = useState('')
   const [genLoading, setGenLoading] = useState(false)
@@ -108,7 +111,20 @@ export default function AdminPage() {
     }
   }
 
-  async function extractFromPdf(file, Tesseract, codeRegex) {
+  const CODE_REGEX = /\b[A-Z0-9]{3,8}-[A-Z0-9]{3,8}-[A-Z0-9]{3,8}\b/gi
+
+  function pickCode(text) {
+    const matches = text.match(CODE_REGEX) || []
+    // Prefer matches with letters — pure-digit groups are usually order/serial numbers, not claim codes.
+    return matches.find(m => /[A-Z]/i.test(m)) || null
+  }
+
+  function pickAllCodes(text) {
+    const matches = text.match(CODE_REGEX) || []
+    return [...new Set(matches.filter(m => /[A-Z]/i.test(m)).map(m => m.toUpperCase()))]
+  }
+
+  async function extractFromPdf(file, Tesseract) {
     const pdfjsLib = await import('pdfjs-dist/legacy/build/pdf')
     pdfjsLib.GlobalWorkerOptions.workerSrc =
       'https://unpkg.com/pdfjs-dist@3.11.174/legacy/build/pdf.worker.min.js'
@@ -123,8 +139,8 @@ export default function AdminPage() {
       fullText += textContent.items.map(it => it.str).join(' ') + '\n'
     }
 
-    let matches = fullText.match(codeRegex)
-    if (matches && matches.length > 0) return matches[0]
+    const code = pickCode(fullText)
+    if (code) return code
 
     // No selectable text (likely a scanned/image PDF) — render to canvas and OCR it.
     const page = await pdf.getPage(1)
@@ -135,8 +151,7 @@ export default function AdminPage() {
     await page.render({ canvasContext: canvas.getContext('2d'), viewport }).promise
 
     const { data } = await Tesseract.recognize(canvas, 'eng')
-    matches = data.text.match(codeRegex)
-    return matches && matches.length > 0 ? matches[0] : null
+    return pickCode(data.text)
   }
 
   async function handleExtractCodes(files) {
@@ -145,7 +160,6 @@ export default function AdminPage() {
     setOcrIssues([])
 
     const Tesseract = (await import('tesseract.js')).default
-    const codeRegex = /\b[A-Z0-9]{3,8}-[A-Z0-9]{3,8}-[A-Z0-9]{3,8}\b/gi
 
     const foundCodes = []
     const issues = []
@@ -156,11 +170,10 @@ export default function AdminPage() {
         let code = null
         const isPdf = files[i].type === 'application/pdf' || files[i].name.toLowerCase().endsWith('.pdf')
         if (isPdf) {
-          code = await extractFromPdf(files[i], Tesseract, codeRegex)
+          code = await extractFromPdf(files[i], Tesseract)
         } else {
           const { data } = await Tesseract.recognize(files[i], 'eng')
-          const matches = data.text.match(codeRegex)
-          code = matches && matches.length > 0 ? matches[0] : null
+          code = pickCode(data.text)
         }
         if (code) {
           foundCodes.push(code.toUpperCase())
@@ -181,6 +194,21 @@ export default function AdminPage() {
     setOcrIssues(issues)
     setOcrProgress('')
     setOcrLoading(false)
+  }
+
+  function handleExtractFromPaste() {
+    const codes = pickAllCodes(pasteText)
+    if (codes.length === 0) {
+      setPasteResult({ found: 0 })
+      return
+    }
+    setCodesInput(prev => {
+      const existing = prev.trim()
+      const added = codes.join('\n')
+      return existing ? `${existing}\n${added}` : added
+    })
+    setPasteResult({ found: codes.length })
+    setPasteText('')
   }
 
   async function handleGenerate(e) {
@@ -390,6 +418,35 @@ export default function AdminPage() {
                     {ocrIssues.map(name => <li key={name}>{name}</li>)}
                   </ul>
                 </div>
+              )}
+            </div>
+
+            <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-4 space-y-3">
+              <div>
+                <span className="block text-sm text-zinc-400 mb-1">Or paste text copied from a gift card PDF</span>
+                <span className="block text-xs text-zinc-600 mb-2">Open the PDF, select all, copy, and paste below — we'll pull out just the claim code(s), even from multiple cards pasted together.</span>
+                <textarea
+                  value={pasteText}
+                  onChange={e => { setPasteText(e.target.value); setPasteResult(null) }}
+                  placeholder="Paste copied PDF text here..."
+                  rows={5}
+                  className="w-full bg-black border border-zinc-800 rounded-xl px-4 py-3 text-white placeholder-zinc-700 focus:outline-none focus:border-amber-500 font-mono text-xs resize-none transition-colors"
+                />
+              </div>
+              <button
+                type="button"
+                onClick={handleExtractFromPaste}
+                disabled={!pasteText.trim()}
+                className="px-6 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 disabled:bg-zinc-800 disabled:text-zinc-600 text-black font-bold text-sm transition-colors"
+              >
+                Extract Codes
+              </button>
+              {pasteResult && (
+                <p className={`text-sm ${pasteResult.found > 0 ? 'text-green-400' : 'text-red-400'}`}>
+                  {pasteResult.found > 0
+                    ? `Found ${pasteResult.found} code${pasteResult.found !== 1 ? 's' : ''}.`
+                    : "No claim code found in that text."}
+                </p>
               )}
             </div>
 
