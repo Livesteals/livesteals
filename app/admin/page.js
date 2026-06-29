@@ -302,10 +302,8 @@ export default function AdminPage() {
   }
 
   const categoryLabels = {
-    gift_cards: 'Gift Cards',
-    shipping: 'Shipping',
-    fees: 'Whatnot Fees',
-    other: 'Other',
+    gift_cards: 'Giftcards',
+    items: 'Items',
   }
 
   const visibleFinanceEntries = financeFilter === 'all'
@@ -686,10 +684,8 @@ export default function AdminPage() {
                       onChange={e => setFinanceCategory(e.target.value)}
                       className="w-full bg-black border border-zinc-800 rounded-lg px-3 py-2.5 text-white text-sm focus:outline-none focus:border-amber-500 transition-colors"
                     >
-                      <option value="gift_cards">Gift Cards</option>
-                      <option value="shipping">Shipping</option>
-                      <option value="fees">Whatnot Fees</option>
-                      <option value="other">Other</option>
+                      <option value="gift_cards">Giftcards</option>
+                      <option value="items">Items</option>
                     </select>
                   </div>
                 ) : (
