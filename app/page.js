@@ -65,16 +65,16 @@ export default function Home() {
       </section>
 
       {/* Stats */}
-      <section className="border-y border-zinc-900 py-14 px-8">
-        <div className="max-w-3xl mx-auto grid grid-cols-3 gap-8 text-center">
+      <section className="border-y border-zinc-900 py-14 px-4 sm:px-8">
+        <div className="max-w-3xl mx-auto grid grid-cols-3 gap-2 sm:gap-8 text-center">
           {[
             { value: '30–40', label: 'Cards Per Stream' },
             { value: 'Amazon', label: 'Gift Cards' },
             { value: '100%', label: 'Free to Win' },
           ].map(s => (
-            <div key={s.label}>
-              <p className="text-4xl md:text-5xl font-black text-amber-400 mb-1">{s.value}</p>
-              <p className="text-zinc-500 text-xs font-semibold uppercase tracking-widest">{s.label}</p>
+            <div key={s.label} className="min-w-0">
+              <p className="text-2xl sm:text-4xl md:text-5xl font-black text-amber-400 mb-1">{s.value}</p>
+              <p className="text-zinc-500 text-[10px] sm:text-xs font-semibold uppercase tracking-widest">{s.label}</p>
             </div>
           ))}
         </div>
