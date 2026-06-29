@@ -27,16 +27,16 @@ export default function CameraHero() {
         />
       </div>
 
-      {/* Giant text behind the camera */}
-      <div className="absolute inset-0 z-10 flex flex-col items-center justify-center pointer-events-none select-none">
+      {/* Giant text in front of the camera */}
+      <div className="absolute inset-0 z-20 flex flex-col items-center justify-center pointer-events-none select-none">
         <h1 className="text-center font-black uppercase leading-[0.82] tracking-tighter text-white/95">
           <span className="block text-[19vw] sm:text-[15vw]">Live</span>
           <span className="block text-[13.5vw] sm:text-[11vw]">Giveaways</span>
         </h1>
       </div>
 
-      {/* 3D camera on top of text */}
-      <div className="absolute inset-0 z-20">
+      {/* 3D camera floating behind the text */}
+      <div className="absolute inset-0 z-10">
         <Camera3D />
       </div>
 

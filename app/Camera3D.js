@@ -14,7 +14,7 @@ export default function Camera3D() {
 
     const scene = new THREE.Scene()
     const camera = new THREE.PerspectiveCamera(35, width / height, 0.1, 100)
-    camera.position.set(0, 0.2, 9.8)
+    camera.position.set(0, 0.2, 12.5)
 
     const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true })
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5))
