@@ -18,7 +18,7 @@ export default function CameraHero() {
       {/* Logo top center */}
       <div className="absolute top-6 left-1/2 -translate-x-1/2 z-30">
         <Image
-          src="/logo-v2.png"
+          src="/logo-v3.png"
           alt="LIVE STEALS"
           width={300}
           height={200}
@@ -76,7 +76,7 @@ export default function CameraHero() {
           </button>
 
           <Image
-            src="/logo-v2.png"
+            src="/logo-v3.png"
             alt="LIVE STEALS"
             width={300}
             height={200}
