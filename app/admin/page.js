@@ -421,52 +421,76 @@ async function generatePDF(tokens, batchLabel) {
     if (i > 0) doc.addPage()
 
     const url = `${baseUrl}/c/${tokens[i].token}`
+    const shortUrl = url.replace('https://', '')
 
     const qrDataUrl = await QRCode.toDataURL(url, {
-      width: 300,
+      width: 250,
       margin: 1,
       errorCorrectionLevel: 'M',
       color: { dark: '#000000', light: '#ffffff' },
     })
 
-    // Title
+    // Congratulations
     doc.setFont('helvetica', 'bold')
-    doc.setFontSize(22)
+    doc.setFontSize(11)
     doc.setTextColor(0, 0, 0)
-    doc.text('LIVE STEALS', 2, 0.6, { align: 'center' })
+    doc.text('CONGRATULATIONS!', 2, 0.4, { align: 'center' })
+
+    // Title
+    doc.setFontSize(20)
+    doc.setTextColor(0, 0, 0)
+    doc.text('LIVE STEALS', 2, 0.72, { align: 'center' })
 
     // Divider
     doc.setDrawColor(210, 210, 210)
-    doc.line(0.4, 0.78, 3.6, 0.78)
+    doc.line(0.4, 0.88, 3.6, 0.88)
 
     // Subtitle
     doc.setFont('helvetica', 'normal')
     doc.setFontSize(9)
     doc.setTextColor(110, 110, 110)
-    doc.text('Scan to claim your', 2, 1.08, { align: 'center' })
+    doc.text("You've won a", 2, 1.1, { align: 'center' })
 
     doc.setFont('helvetica', 'bold')
     doc.setFontSize(13)
     doc.setTextColor(0, 0, 0)
-    doc.text('$5 Amazon Gift Card', 2, 1.36, { align: 'center' })
+    doc.text('$5 Amazon Gift Card!', 2, 1.35, { align: 'center' })
 
-    // QR Code
-    doc.addImage(qrDataUrl, 'PNG', 0.5, 1.56, 3, 3)
+    // QR Code — smaller, centered
+    doc.addImage(qrDataUrl, 'PNG', 0.75, 1.55, 2.5, 2.5)
 
-    // Instruction
+    // Scan instruction
     doc.setFont('helvetica', 'normal')
     doc.setFontSize(8)
-    doc.setTextColor(130, 130, 130)
-    doc.text('Point your phone camera at the QR code above', 2, 4.72, { align: 'center' })
+    doc.setTextColor(100, 100, 100)
+    doc.text('Point your phone camera at the QR code to claim', 2, 4.18, { align: 'center' })
+
+    // OR divider
+    doc.setFontSize(8)
+    doc.setTextColor(180, 180, 180)
+    doc.text('- - - - - - - - - - OR - - - - - - - - - -', 2, 4.42, { align: 'center' })
+
+    // Manual link
+    doc.setFont('helvetica', 'normal')
+    doc.setFontSize(7.5)
+    doc.setTextColor(100, 100, 100)
+    doc.text("Can't scan? Type this link in your browser:", 2, 4.65, { align: 'center' })
+
+    doc.setFont('helvetica', 'bold')
+    doc.setFontSize(6.5)
+    doc.setTextColor(0, 0, 0)
+    const urlLines = doc.splitTextToSize(shortUrl, 3.4)
+    doc.text(urlLines, 2, 4.85, { align: 'center' })
 
     // Divider
-    doc.setDrawColor(225, 225, 225)
-    doc.line(0.4, 4.88, 3.6, 4.88)
+    doc.setDrawColor(230, 230, 230)
+    const footerY = 4.85 + (urlLines.length * 0.1) + 0.12
+    doc.line(0.4, footerY, 3.6, footerY)
 
     // Token (for support)
     doc.setFontSize(5.5)
     doc.setTextColor(195, 195, 195)
-    doc.text(tokens[i].token, 2, 5.08, { align: 'center' })
+    doc.text(tokens[i].token, 2, footerY + 0.18, { align: 'center' })
 
     if (batchLabel) {
       doc.setFontSize(7)
