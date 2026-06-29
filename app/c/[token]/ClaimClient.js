@@ -57,7 +57,7 @@ export default function ClaimClient({ token }) {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
             </svg>
           </div>
-          <h1 className="text-2xl font-bold mb-1">Here's Your Code</h1>
+          <h1 className="text-2xl font-bold mb-1">Congratulations!</h1>
           <p className="text-zinc-500 text-sm mb-8">A copy was also sent to {email}</p>
 
           <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 mb-4">
@@ -71,9 +71,28 @@ export default function ClaimClient({ token }) {
             </button>
           </div>
 
-          <p className="text-zinc-600 text-sm">
-            Redeem at <span className="text-zinc-400">amazon.com/gc/redeem</span>
+          <p className="text-zinc-600 text-sm mb-6">
+            Redeem at{' '}
+            <a
+              href="https://www.amazon.com/gc/redeem"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-amber-400 hover:text-amber-300 underline transition-colors"
+            >
+              amazon.com/gc/redeem
+            </a>
           </p>
+
+          <a
+            href="https://www.whatnot.com/s/WZZ45wou"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="block bg-amber-500/10 border border-amber-500/20 rounded-2xl p-4 hover:bg-amber-500/15 transition-colors"
+          >
+            <p className="text-amber-400 font-bold text-sm mb-1">⭐⭐⭐⭐⭐ Enjoying LIVESTEALS?</p>
+            <p className="text-zinc-400 text-xs">Leave us a 5-star review on Whatnot</p>
+          </a>
+
           <p className="text-zinc-800 text-xs mt-8">livesteals.co</p>
         </div>
       </div>
