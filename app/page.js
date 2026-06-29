@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import Image from 'next/image'
 import ClaimPopup from './ClaimPopup'
 
 export default function Home() {
@@ -6,10 +7,8 @@ export default function Home() {
     <div className="min-h-screen bg-black text-zinc-100">
 
       {/* Nav */}
-      <nav className="flex items-center justify-between px-8 py-5 border-b border-zinc-900">
-        <span className="text-2xl font-black tracking-tight">
-          <span className="text-white">LIVE</span><span className="text-amber-400">STEALS</span>
-        </span>
+      <nav className="flex items-center justify-between px-8 py-4 bg-black border-b border-red-900/40">
+        <Image src="/logo.jpg" alt="LIVE STEALS" width={44} height={44} className="rounded-lg" priority />
         <div className="flex items-center gap-6">
           <a
             href="https://www.whatnot.com/s/WZZ45wou"
@@ -24,7 +23,7 @@ export default function Home() {
             href="https://www.whatnot.com/s/WZZ45wou"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-sm font-bold px-4 py-2 bg-amber-400 hover:bg-amber-300 text-black rounded-lg transition-colors"
+            className="text-sm font-bold px-4 py-2 bg-gradient-to-b from-amber-300 to-amber-500 hover:from-amber-200 hover:to-amber-400 text-black rounded-lg transition-colors"
           >
             Watch Live
           </a>
@@ -32,40 +31,47 @@ export default function Home() {
       </nav>
 
       {/* Hero */}
-      <section className="relative max-w-5xl mx-auto px-8 pt-24 pb-28 text-center overflow-hidden">
-        <div className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_50%_0%,rgba(251,191,36,0.12),transparent_60%)]" />
+      <section className="relative px-8 pt-20 pb-28 text-center overflow-hidden bg-gradient-to-br from-red-700 via-red-800 to-red-950">
+        {/* geometric corner accents */}
+        <div className="absolute top-0 left-0 w-40 h-40 bg-black/40 -translate-x-1/2 -translate-y-1/2 rotate-45" />
+        <div className="absolute top-0 right-0 w-56 h-56 bg-black/30 translate-x-1/3 -translate-y-1/3 rotate-45" />
+        <div className="absolute bottom-0 left-1/4 w-72 h-72 bg-black/20 translate-y-1/2 rotate-45" />
 
-        <div className="inline-flex items-center gap-2 bg-amber-400/10 text-amber-400 text-xs font-bold px-4 py-2 rounded-full mb-8 uppercase tracking-widest border border-amber-400/20">
-          <span className="w-2 h-2 bg-amber-400 rounded-full animate-pulse inline-block"></span>
-          Live Giveaways on Whatnot
+        <div className="relative max-w-3xl mx-auto">
+          <div className="inline-flex items-center gap-2 bg-black text-white text-xs font-bold px-4 py-2 rounded-full mb-8 uppercase tracking-widest">
+            <span className="w-2 h-2 bg-red-500 rounded-full animate-pulse inline-block"></span>
+            Now Live on Whatnot
+          </div>
+
+          <h1 className="text-5xl md:text-7xl font-black tracking-tight leading-[1.05] mb-6 text-white drop-shadow-[0_4px_0_rgba(0,0,0,0.4)]">
+            Win an<br />
+            <span className="bg-gradient-to-b from-amber-200 via-amber-400 to-amber-600 bg-clip-text text-transparent drop-shadow-[0_4px_0_rgba(0,0,0,0.3)]">
+              Amazon Gift Card
+            </span>
+          </h1>
+
+          <p className="text-lg text-red-100 max-w-xl mx-auto mb-10 leading-relaxed">
+            Join a LIVESTEALS stream on Whatnot, win a giveaway, and claim your code the moment your card arrives in the mail.
+          </p>
+
+          <a
+            href="https://www.whatnot.com/s/WZZ45wou"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-3 px-10 py-4 bg-gradient-to-b from-amber-300 to-amber-500 hover:from-amber-200 hover:to-amber-400 text-black font-black text-lg rounded-2xl transition-colors shadow-xl shadow-black/30"
+          >
+            <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M8 5v14l11-7z"/>
+            </svg>
+            Watch Live on Whatnot
+          </a>
+
+          <p className="text-red-200/70 text-sm mt-5">Free to join. No purchase necessary.</p>
         </div>
-
-        <h1 className="text-6xl md:text-8xl font-black tracking-tight leading-none mb-6">
-          Win an <span className="text-amber-400">Amazon</span><br />Gift Card
-        </h1>
-
-        <p className="text-xl text-zinc-500 max-w-xl mx-auto mb-10 leading-relaxed">
-          Join a LIVESTEALS stream on Whatnot, win a giveaway, and claim your code the moment your card arrives in the mail.
-        </p>
-
-        <a
-          href="https://www.whatnot.com/s/WZZ45wou"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex items-center gap-3 px-10 py-4 bg-amber-400 hover:bg-amber-300 text-black font-bold text-lg rounded-2xl transition-colors shadow-lg shadow-amber-400/20"
-        >
-          <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M8 5v14l11-7z"/>
-          </svg>
-          Watch Live on Whatnot
-        </a>
-
-        <p className="text-zinc-600 text-sm mt-5">Free to join. No purchase necessary.</p>
-
       </section>
 
       {/* Stats */}
-      <section className="border-y border-zinc-900 py-14 px-4 sm:px-8">
+      <section className="border-b border-red-900/40 py-14 px-4 sm:px-8 bg-black">
         <div className="max-w-3xl mx-auto grid grid-cols-3 gap-2 sm:gap-8 text-center">
           {[
             { value: '30–40', label: 'Cards Per Stream' },
@@ -81,7 +87,7 @@ export default function Home() {
       </section>
 
       {/* How it works */}
-      <section className="max-w-5xl mx-auto px-8 py-24">
+      <section className="max-w-5xl mx-auto px-8 py-24 bg-black">
         <div className="text-center mb-16">
           <h2 className="text-4xl font-black text-white mb-3">How It Works</h2>
           <p className="text-zinc-500">Simple. Fast. Free.</p>
@@ -120,9 +126,9 @@ export default function Home() {
               ),
             },
           ].map(item => (
-            <div key={item.num} className="bg-zinc-950 rounded-3xl p-8 border border-zinc-900 hover:border-amber-400/30 transition-colors">
+            <div key={item.num} className="bg-zinc-950 rounded-3xl p-8 border border-red-900/30 hover:border-amber-400/40 transition-colors">
               <div className="flex items-center gap-3 mb-4">
-                <div className="w-10 h-10 bg-amber-400 text-black rounded-xl flex items-center justify-center shrink-0">
+                <div className="w-10 h-10 bg-gradient-to-b from-red-500 to-red-700 text-white rounded-xl flex items-center justify-center shrink-0">
                   {item.icon}
                 </div>
                 <span className="text-xs font-bold text-zinc-600 uppercase tracking-widest">Step {item.num}</span>
@@ -135,19 +141,21 @@ export default function Home() {
       </section>
 
       {/* CTA */}
-      <section className="bg-zinc-950 border-t border-zinc-900 py-20 px-8 text-center">
-        <div className="max-w-xl mx-auto">
+      <section className="relative overflow-hidden py-20 px-8 text-center bg-gradient-to-br from-red-700 via-red-800 to-red-950">
+        <div className="absolute top-0 right-0 w-56 h-56 bg-black/30 translate-x-1/3 -translate-y-1/3 rotate-45" />
+        <div className="absolute bottom-0 left-0 w-56 h-56 bg-black/30 -translate-x-1/3 translate-y-1/3 rotate-45" />
+        <div className="relative max-w-xl mx-auto">
           <h2 className="text-4xl md:text-5xl font-black text-white mb-4">
             Don't Miss the Next Stream
           </h2>
-          <p className="text-zinc-500 text-lg mb-10">
+          <p className="text-red-100 text-lg mb-10">
             Follow LIVESTEALS on Whatnot and get notified when we go live.
           </p>
           <a
             href="https://www.whatnot.com/s/WZZ45wou"
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-block px-12 py-5 bg-amber-400 hover:bg-amber-300 text-black font-black text-xl rounded-2xl transition-colors shadow-xl shadow-amber-400/20"
+            className="inline-block px-12 py-5 bg-gradient-to-b from-amber-300 to-amber-500 hover:from-amber-200 hover:to-amber-400 text-black font-black text-xl rounded-2xl transition-colors shadow-xl shadow-black/30"
           >
             Follow on Whatnot
           </a>
@@ -155,11 +163,9 @@ export default function Home() {
       </section>
 
       {/* Footer */}
-      <footer className="py-10 px-8">
+      <footer className="py-10 px-8 bg-black">
         <div className="max-w-5xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
-          <span className="text-xl font-black">
-            <span className="text-white">LIVE</span><span className="text-amber-400">STEALS</span>
-          </span>
+          <Image src="/logo.jpg" alt="LIVE STEALS" width={36} height={36} className="rounded-lg" />
           <p className="text-zinc-600 text-sm">livesteals.co</p>
           <Link href="/admin" className="text-zinc-700 text-xs hover:text-zinc-500 transition-colors">
             Admin
