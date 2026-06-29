@@ -1,9 +1,7 @@
 import Link from 'next/link'
 import Image from 'next/image'
-import dynamic from 'next/dynamic'
 import ClaimPopup from './ClaimPopup'
-
-const GiftCard3D = dynamic(() => import('./GiftCard3D'), { ssr: false })
+import GiftCard3D from './GiftCard3DWrapper'
 
 export default function Home() {
   return (
