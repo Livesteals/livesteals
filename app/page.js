@@ -104,7 +104,7 @@ export default function Home() {
       {/* Footer */}
       <footer className="py-10 px-8 bg-black">
         <div className="max-w-5xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
-          <Image src="/logo.jpg" alt="LIVE STEALS" width={36} height={36} className="rounded-lg" />
+          <Image src="/logo.png" alt="LIVE STEALS" width={150} height={100} className="h-9 w-auto" />
           <p className="text-zinc-600 text-sm">livesteals.co</p>
           <Link href="/admin" className="text-zinc-700 text-xs hover:text-zinc-500 transition-colors">
             Admin

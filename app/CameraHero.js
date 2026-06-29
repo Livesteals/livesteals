@@ -18,12 +18,12 @@ export default function CameraHero() {
       {/* Logo top center */}
       <div className="absolute top-6 left-1/2 -translate-x-1/2 z-30">
         <Image
-          src="/logo.jpg"
+          src="/logo.png"
           alt="LIVE STEALS"
-          width={150}
-          height={96}
+          width={300}
+          height={200}
           priority
-          className="h-16 w-auto object-contain drop-shadow-[0_4px_10px_rgba(0,0,0,0.35)]"
+          className="h-20 w-auto object-contain drop-shadow-[0_6px_14px_rgba(0,0,0,0.4)]"
         />
       </div>
 
@@ -76,11 +76,11 @@ export default function CameraHero() {
           </button>
 
           <Image
-            src="/logo.jpg"
+            src="/logo.png"
             alt="LIVE STEALS"
-            width={160}
-            height={102}
-            className="h-16 w-auto object-contain mb-12 drop-shadow-[0_4px_10px_rgba(0,0,0,0.35)]"
+            width={300}
+            height={200}
+            className="h-20 w-auto object-contain mb-12 drop-shadow-[0_6px_14px_rgba(0,0,0,0.4)]"
           />
 
           <nav className="flex flex-col items-center gap-6">
