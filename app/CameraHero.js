@@ -2,7 +2,6 @@
 import { useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
-import Camera3D from './Camera3DWrapper'
 import ClaimPopup from './ClaimPopup'
 
 const MENU_LINK = 'text-4xl sm:text-5xl font-black uppercase tracking-tight text-white/90 hover:text-white transition-colors'
@@ -27,17 +26,37 @@ export default function CameraHero() {
         />
       </div>
 
-      {/* Giant text in front of the camera */}
-      <div className="absolute inset-0 z-20 flex flex-col items-center justify-center pointer-events-none select-none">
-        <h1 className="text-center font-black uppercase leading-[0.82] tracking-tighter text-white/95">
-          <span className="block text-[19vw] sm:text-[15vw]">Live</span>
-          <span className="block text-[13.5vw] sm:text-[11vw]">Giveaways</span>
-        </h1>
-      </div>
+      {/* Hero content */}
+      <div className="absolute inset-0 z-20 flex flex-col items-center justify-center px-6 text-center">
+        <div className="max-w-2xl">
+          <div className="inline-flex items-center gap-2 bg-black text-white text-xs font-bold px-4 py-2 rounded-full mb-7 uppercase tracking-widest">
+            <span className="w-2 h-2 bg-red-500 rounded-full animate-pulse inline-block"></span>
+            Now Live on Whatnot
+          </div>
 
-      {/* 3D camera floating behind the text */}
-      <div className="absolute inset-0 z-10">
-        <Camera3D />
+          <h1 className="text-5xl md:text-7xl font-black tracking-tight leading-[1.05] mb-6 text-white [text-shadow:0_1px_0_#8a1818,0_2px_0_#7a1515,0_3px_0_#6a1212,0_4px_0_#5a0f0f,0_8px_12px_rgba(0,0,0,0.5)]">
+            Win Gift Cards.<br />
+            <span className="bg-gradient-to-b from-amber-200 via-amber-400 to-amber-600 bg-clip-text text-transparent [filter:drop-shadow(0_2px_0_rgba(120,70,0,0.6))_drop-shadow(0_4px_0_rgba(90,50,0,0.6))_drop-shadow(0_10px_14px_rgba(0,0,0,0.45))]">
+              Steal the Deals.
+            </span>
+          </h1>
+
+          <p className="text-lg text-red-50 max-w-xl mx-auto mb-9 leading-relaxed">
+            More than a giveaway. I go live on Whatnot selling real products at steal prices &mdash; plus free Amazon gift card giveaways every stream. Join, shop, and win.
+          </p>
+
+          <a
+            href="https://www.whatnot.com/s/WZZ45wou"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-3 px-10 py-4 bg-gradient-to-b from-amber-300 to-amber-500 hover:from-amber-200 hover:to-amber-400 text-black font-black text-lg rounded-2xl transition-colors shadow-xl shadow-black/30"
+          >
+            <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M8 5v14l11-7z" />
+            </svg>
+            Watch Live on Whatnot
+          </a>
+        </div>
       </div>
 
       {/* Bubble decoration bottom left */}
