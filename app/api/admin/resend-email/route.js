@@ -24,6 +24,11 @@ export async function POST(request) {
     return NextResponse.json({ error: 'Token not yet claimed' }, { status: 400 })
   }
 
-  await sendClaimEmail(data.email, data.codes.code)
+  try {
+    await sendClaimEmail(data.email, data.codes.code)
+  } catch (err) {
+    return NextResponse.json({ error: err.message || 'Email send failed' }, { status: 500 })
+  }
+
   return NextResponse.json({ success: true })
 }
