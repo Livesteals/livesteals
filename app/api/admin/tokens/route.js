@@ -1,5 +1,6 @@
 import { supabase } from '../../../../lib/supabase'
 import { isAdmin } from '../../../../lib/auth'
+import { logActivity } from '../../../../lib/activity'
 import { NextResponse } from 'next/server'
 import { randomUUID } from 'crypto'
 
@@ -25,6 +26,12 @@ export async function POST(request) {
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 })
   }
+
+  logActivity(
+    'labels_generated',
+    `Generated ${qty} claim label${qty !== 1 ? 's' : ''}${batchLabel ? ` — ${batchLabel}` : ''}`,
+    { meta: { count: qty, batch: batchLabel || null } }
+  )
 
   return NextResponse.json({ tokens: data })
 }

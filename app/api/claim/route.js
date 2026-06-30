@@ -1,5 +1,6 @@
 import { supabase } from '../../../lib/supabase'
 import { sendClaimEmail } from '../../../lib/email'
+import { logActivity } from '../../../lib/activity'
 import { NextResponse } from 'next/server'
 
 export async function POST(request) {
@@ -26,8 +27,14 @@ export async function POST(request) {
       return NextResponse.json({ success: false, error: result.error_message })
     }
 
+    const cleanEmail = email.toLowerCase().trim()
+
+    logActivity('claim_redeemed', `Gift card claimed by ${cleanEmail}`, {
+      meta: { code: result.code },
+    })
+
     // Send email — don't fail the claim if email fails
-    sendClaimEmail(email.toLowerCase().trim(), result.code).catch(err =>
+    sendClaimEmail(cleanEmail, result.code).catch(err =>
       console.error('Email send failed:', err)
     )
 

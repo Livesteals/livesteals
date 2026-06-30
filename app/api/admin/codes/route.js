@@ -1,5 +1,6 @@
 import { supabase } from '../../../../lib/supabase'
 import { isAdmin } from '../../../../lib/auth'
+import { logActivity } from '../../../../lib/activity'
 import { NextResponse } from 'next/server'
 
 export async function POST(request) {
@@ -24,5 +25,10 @@ export async function POST(request) {
     return NextResponse.json({ error: error.message }, { status: 500 })
   }
 
-  return NextResponse.json({ added: data?.length ?? 0 })
+  const added = data?.length ?? 0
+  if (added > 0) {
+    logActivity('codes_added', `Added ${added} gift card code${added !== 1 ? 's' : ''}`, { meta: { count: added } })
+  }
+
+  return NextResponse.json({ added })
 }

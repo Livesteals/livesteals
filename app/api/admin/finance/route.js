@@ -1,6 +1,10 @@
 import { supabase } from '../../../../lib/supabase'
 import { isAdmin } from '../../../../lib/auth'
+import { logActivity } from '../../../../lib/activity'
 import { NextResponse } from 'next/server'
+
+const TYPE_LABELS = { revenue: 'Revenue', earnings: 'Est. earnings', expense: 'Expense', payout: 'Payout' }
+const CATEGORY_LABELS = { gift_cards: 'Giftcards', items: 'Items', other: 'Other' }
 
 export async function GET(request) {
   if (!isAdmin(request)) {
@@ -50,6 +54,13 @@ export async function POST(request) {
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 })
   }
+
+  const catText = category ? ` (${CATEGORY_LABELS[category] || category})` : ''
+  logActivity(
+    `finance_${entryType}`,
+    `Logged ${TYPE_LABELS[entryType] || entryType}${catText} — $${amountNum.toFixed(2)}`,
+    { amount: amountNum, meta: { category: category || null, note: note || null } }
+  )
 
   return NextResponse.json({ entry: data })
 }
