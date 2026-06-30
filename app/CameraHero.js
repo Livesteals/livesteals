@@ -119,9 +119,6 @@ export default function CameraHero() {
               How It Works
             </Link>
             <ClaimPopup trigger="Claim Gift Card" className={MENU_LINK} />
-            <Link href="/admin" onClick={() => setMenuOpen(false)} className={MENU_LINK}>
-              Admin
-            </Link>
           </nav>
         </div>
       )}

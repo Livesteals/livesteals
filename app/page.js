@@ -1,4 +1,3 @@
-import Link from 'next/link'
 import Image from 'next/image'
 import CameraHero from './CameraHero'
 
@@ -106,9 +105,6 @@ export default function Home() {
         <div className="max-w-5xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
           <Image src="/logo-v3.png" alt="LIVE STEALS" width={150} height={100} className="h-9 w-auto" />
           <p className="text-zinc-600 text-sm">livesteals.co</p>
-          <Link href="/admin" className="text-zinc-700 text-xs hover:text-zinc-500 transition-colors">
-            Admin
-          </Link>
         </div>
       </footer>
 
