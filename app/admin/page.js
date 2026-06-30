@@ -212,18 +212,24 @@ export default function AdminPage() {
     }
   }
 
+  // Parse the PDF entirely in the browser. This avoids uploading the file to a
+  // serverless function (which has a ~4.5MB request-body limit and a short
+  // timeout) — so large batches of cards work regardless of file size.
   async function extractFromPdf(file) {
-    const pw = localStorage.getItem('ls_pw') || ''
-    const formData = new FormData()
-    formData.append('file', file)
-    const res = await fetch('/api/admin/extract-pdf', {
-      method: 'POST',
-      headers: { 'x-admin-password': pw },
-      body: formData,
-    })
-    if (!res.ok) return []
-    const data = await res.json()
-    return data.codes || []
+    const pdfjsLib = await import('pdfjs-dist')
+    pdfjsLib.GlobalWorkerOptions.workerSrc = new URL(
+      'pdfjs-dist/build/pdf.worker.min.mjs',
+      import.meta.url
+    ).toString()
+    const data = await file.arrayBuffer()
+    const pdf = await pdfjsLib.getDocument({ data }).promise
+    let text = ''
+    for (let p = 1; p <= pdf.numPages; p++) {
+      const page = await pdf.getPage(p)
+      const content = await page.getTextContent()
+      text += content.items.map(it => (it.str || '')).join(' ') + '\n'
+    }
+    return pickAllCodes(text)
   }
 
   async function handleExtractCodes(files) {
