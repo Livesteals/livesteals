@@ -159,6 +159,8 @@ export default function AdminPage() {
     if (!authed) return
     setSidebarOpen(false)
     if (activeTab === 'dashboard') { loadStats(); loadFinance(); loadActivity() }
+    if (activeTab === 'codes') loadStats()
+    if (activeTab === 'generate') loadStats()
     if (activeTab === 'claims') loadClaims()
     if (activeTab === 'finance') loadFinance()
     if (activeTab === 'activity') loadActivity()
@@ -526,10 +528,10 @@ export default function AdminPage() {
               {/* Inventory stats */}
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
                 {[
-                  { label: 'Codes Available', value: stats?.codes.unused, color: 'text-green-400' },
-                  { label: 'Codes Used', value: stats?.codes.claimed, color: 'text-zinc-200' },
-                  { label: 'Cards Unclaimed', value: stats?.tokens.unclaimed, color: 'text-amber-400' },
-                  { label: 'Cards Claimed', value: stats?.tokens.claimed, color: 'text-zinc-200' },
+                  { label: 'Available', value: stats?.codes.available, color: 'text-green-400' },
+                  { label: 'Unclaimed', value: stats?.codes.unclaimed, color: 'text-amber-400' },
+                  { label: 'Claimed', value: stats?.codes.claimed, color: 'text-zinc-200' },
+                  { label: 'Total Codes', value: stats?.codes.total, color: 'text-zinc-400' },
                 ].map(s => (
                   <div key={s.label} className="bg-zinc-900 border border-zinc-800 rounded-2xl p-5">
                     <p className={`text-3xl font-black ${s.color}`}>{s.value ?? '—'}</p>
@@ -538,11 +540,11 @@ export default function AdminPage() {
                 ))}
               </div>
 
-              {stats && stats.codes.unused <= 5 && (
+              {stats && stats.codes.available <= 5 && (
                 <div className="bg-red-500/10 border border-red-500/20 rounded-2xl p-4">
                   <p className="text-red-400 font-semibold text-sm mb-1">Low on codes</p>
                   <p className="text-red-400/60 text-sm">
-                    Only {stats.codes.unused} code{stats.codes.unused !== 1 ? 's' : ''} left. Add more before your next stream.
+                    Only {stats.codes.available} code{stats.codes.available !== 1 ? 's' : ''} available. Add more before your next stream.
                   </p>
                 </div>
               )}
@@ -690,6 +692,10 @@ export default function AdminPage() {
               <div>
                 <h2 className="text-xl font-bold mb-1">Generate QR Cards</h2>
                 <p className="text-zinc-500 text-sm">Creates a PDF of printable claim cards. Print on 4×6 thermal labels.</p>
+                <p className="text-zinc-500 text-sm mt-2">
+                  Each card locks one available code.{' '}
+                  <span className="text-green-400 font-semibold">{stats?.codes.available ?? '—'} available</span> to generate from.
+                </p>
               </div>
               <form onSubmit={handleGenerate} className="space-y-4">
                 <div>

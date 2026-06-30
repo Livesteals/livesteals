@@ -2,7 +2,6 @@ import { supabase } from '../../../../lib/supabase'
 import { isAdmin } from '../../../../lib/auth'
 import { logActivity } from '../../../../lib/activity'
 import { NextResponse } from 'next/server'
-import { randomUUID } from 'crypto'
 
 export async function POST(request) {
   if (!isAdmin(request)) {
@@ -16,15 +15,22 @@ export async function POST(request) {
     return NextResponse.json({ error: 'Quantity must be between 1 and 200' }, { status: 400 })
   }
 
-  const rows = Array.from({ length: qty }, () => ({
-    token: randomUUID().replace(/-/g, ''),
-    batch_label: batchLabel || null,
-  }))
-
-  const { data, error } = await supabase.from('tokens').insert(rows).select('id, token')
+  // Each label locks one available gift-card code (status unused -> unclaimed).
+  const { data, error } = await supabase.rpc('generate_labels', {
+    p_qty: qty,
+    p_batch: batchLabel || null,
+  })
 
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 })
+    const msg = error.message || ''
+    if (msg.includes('not_enough_codes')) {
+      const available = msg.split('not_enough_codes:')[1]?.trim() || '0'
+      return NextResponse.json(
+        { error: `Not enough codes available. You have ${available} — add more codes in Add Codes, or generate fewer cards.` },
+        { status: 400 }
+      )
+    }
+    return NextResponse.json({ error: msg }, { status: 500 })
   }
 
   logActivity(

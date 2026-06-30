@@ -1,9 +1,13 @@
 -- Run this entire file in the Supabase SQL Editor (supabase.com → your project → SQL Editor)
 
+-- Code lifecycle:
+--   'unused'    -> Available (entered, in inventory)
+--   'unclaimed' -> locked to a printed label, awaiting redemption
+--   'claimed'   -> redeemed
 CREATE TABLE IF NOT EXISTS codes (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   code TEXT UNIQUE NOT NULL,
-  status TEXT DEFAULT 'unused' CHECK (status IN ('unused', 'claimed')),
+  status TEXT DEFAULT 'unused' CHECK (status IN ('unused', 'unclaimed', 'claimed')),
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
@@ -22,7 +26,47 @@ CREATE TABLE IF NOT EXISTS tokens (
 CREATE INDEX IF NOT EXISTS tokens_token_idx ON tokens(token);
 CREATE INDEX IF NOT EXISTS codes_status_idx ON codes(status);
 
--- Atomic claim function — prevents two people from grabbing the same code at the same time
+-- Generate N claim labels, locking one available code to each (unused -> unclaimed).
+-- Raises 'not_enough_codes:<available>' if there aren't enough available codes.
+CREATE OR REPLACE FUNCTION generate_labels(p_qty INT, p_batch TEXT)
+RETURNS TABLE(id UUID, token TEXT)
+LANGUAGE plpgsql
+AS $$
+DECLARE
+  v_available INT;
+BEGIN
+  SELECT COUNT(*) INTO v_available FROM codes WHERE status = 'unused';
+  IF v_available < p_qty THEN
+    RAISE EXCEPTION 'not_enough_codes:%', v_available;
+  END IF;
+
+  RETURN QUERY
+  WITH picked AS (
+    SELECT c.id
+    FROM codes c
+    WHERE c.status = 'unused'
+    ORDER BY c.created_at
+    LIMIT p_qty
+    FOR UPDATE SKIP LOCKED
+  ),
+  bound AS (
+    UPDATE codes
+    SET status = 'unclaimed'
+    WHERE codes.id IN (SELECT picked.id FROM picked)
+    RETURNING codes.id
+  ),
+  created AS (
+    INSERT INTO tokens (token, batch_label, status, code_id)
+    SELECT replace(gen_random_uuid()::text, '-', ''), p_batch, 'unclaimed', bound.id
+    FROM bound
+    RETURNING tokens.id, tokens.token
+  )
+  SELECT created.id, created.token FROM created;
+END;
+$$;
+
+-- Atomic claim — uses the code already locked to the label at generation time,
+-- falling back to any available code for legacy labels with no bound code.
 CREATE OR REPLACE FUNCTION claim_token(p_token TEXT, p_email TEXT)
 RETURNS TABLE(success BOOLEAN, code TEXT, error_message TEXT)
 LANGUAGE plpgsql
@@ -49,7 +93,11 @@ BEGIN
     RETURN;
   END IF;
 
-  SELECT * INTO v_code FROM codes WHERE status = 'unused' ORDER BY created_at LIMIT 1 FOR UPDATE SKIP LOCKED;
+  IF v_token.code_id IS NOT NULL THEN
+    SELECT * INTO v_code FROM codes WHERE id = v_token.code_id FOR UPDATE;
+  ELSE
+    SELECT * INTO v_code FROM codes WHERE status = 'unused' ORDER BY created_at LIMIT 1 FOR UPDATE SKIP LOCKED;
+  END IF;
 
   IF NOT FOUND THEN
     RETURN QUERY SELECT false, NULL::TEXT, 'no_codes_available';

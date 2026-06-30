@@ -18,7 +18,8 @@ export async function GET(request) {
   return NextResponse.json({
     codes: {
       total: codes.length,
-      unused: codes.filter(c => c.status === 'unused').length,
+      available: codes.filter(c => c.status === 'unused').length,
+      unclaimed: codes.filter(c => c.status === 'unclaimed').length,
       claimed: codes.filter(c => c.status === 'claimed').length,
     },
     tokens: {
