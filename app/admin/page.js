@@ -97,6 +97,11 @@ function timeAgo(iso) {
   return d.toLocaleDateString()
 }
 
+function csvCell(val) {
+  const s = String(val ?? '')
+  return /[",\n\r]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s
+}
+
 export default function AdminPage() {
   const [password, setPassword] = useState('')
   const [authed, setAuthed] = useState(false)
@@ -127,6 +132,7 @@ export default function AdminPage() {
   const [claimsLoading, setClaimsLoading] = useState(false)
   const [resendingId, setResendingId] = useState(null)
   const [resendDone, setResendDone] = useState(null)
+  const [exportingEmails, setExportingEmails] = useState(false)
 
   const [resetLoading, setResetLoading] = useState(false)
 
@@ -334,6 +340,39 @@ export default function AdminPage() {
     const res = await adminFetch('/api/admin/claims')
     if (res.ok) { const d = await res.json(); setClaims(d.claims || []) }
     setClaimsLoading(false)
+  }
+
+  async function handleExportEmails() {
+    setExportingEmails(true)
+    try {
+      const res = await adminFetch('/api/admin/export-emails')
+      if (!res.ok) return
+      const { rows } = await res.json()
+      if (!rows || rows.length === 0) {
+        window.alert('No claimed emails to export yet.')
+        return
+      }
+      const header = ['Email', 'Date Claimed', 'Batch', 'Gift Code']
+      const lines = rows.map(r => [
+        r.email || '',
+        r.claimed_at ? new Date(r.claimed_at).toLocaleString() : '',
+        r.batch_label || '',
+        r.codes?.code || '',
+      ])
+      // ﻿ BOM so Excel opens UTF-8 correctly
+      const csv = '﻿' + [header, ...lines].map(cols => cols.map(csvCell).join(',')).join('\r\n')
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `livesteals-emails-${new Date().toISOString().slice(0, 10)}.csv`
+      document.body.appendChild(a)
+      a.click()
+      a.remove()
+      URL.revokeObjectURL(url)
+    } finally {
+      setExportingEmails(false)
+    }
   }
 
   async function handleResend(id) {
@@ -739,14 +778,23 @@ export default function AdminPage() {
 
           {activeTab === 'claims' && (
             <div className="space-y-4">
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between gap-3">
                 <h2 className="text-xl font-bold">All Claims</h2>
-                <button
-                  onClick={loadClaims}
-                  className="text-sm text-zinc-500 hover:text-zinc-300 transition-colors"
-                >
-                  Refresh
-                </button>
+                <div className="flex items-center gap-3">
+                  <button
+                    onClick={handleExportEmails}
+                    disabled={exportingEmails}
+                    className="text-sm px-3 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-400 disabled:bg-zinc-800 disabled:text-zinc-600 text-black font-semibold transition-colors"
+                  >
+                    {exportingEmails ? 'Exporting...' : 'Download Emails (CSV)'}
+                  </button>
+                  <button
+                    onClick={loadClaims}
+                    className="text-sm text-zinc-500 hover:text-zinc-300 transition-colors"
+                  >
+                    Refresh
+                  </button>
+                </div>
               </div>
 
               {claimsLoading ? (
