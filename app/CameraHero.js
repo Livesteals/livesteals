@@ -14,8 +14,12 @@ export default function CameraHero() {
       {/* subtle vignette for depth */}
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_center,_transparent_30%,_rgba(0,0,0,0.28)_100%)]" />
 
-      {/* Logo top center */}
-      <div className="absolute top-6 left-1/2 -translate-x-1/2 z-30">
+      {/* Logo top center — click to refresh */}
+      <button
+        onClick={() => window.location.reload()}
+        aria-label="Refresh page"
+        className="absolute top-6 left-1/2 -translate-x-1/2 z-30 cursor-pointer transition-transform hover:scale-105 active:scale-95"
+      >
         <Image
           src="/logo-v3.png"
           alt="LIVE STEALS"
@@ -24,7 +28,7 @@ export default function CameraHero() {
           priority
           className="h-20 w-auto object-contain drop-shadow-[0_6px_14px_rgba(0,0,0,0.4)]"
         />
-      </div>
+      </button>
 
       {/* Hero content */}
       <div className="absolute inset-0 z-20 flex flex-col items-center justify-center px-6 text-center">

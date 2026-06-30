@@ -434,7 +434,13 @@ export default function AdminPage() {
         }`}
       >
         <div className="px-5 h-16 flex items-center border-b border-zinc-800/80 shrink-0">
-          <span className="text-amber-500 font-black tracking-widest text-sm uppercase">LIVE STEALS</span>
+          <button
+            onClick={() => window.location.reload()}
+            title="Refresh"
+            className="text-amber-500 font-black tracking-widest text-sm uppercase hover:text-amber-400 transition-colors"
+          >
+            LIVE STEALS
+          </button>
         </div>
 
         <nav className="flex-1 overflow-y-auto px-3 py-5 space-y-6">
