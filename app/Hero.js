@@ -7,11 +7,16 @@ import ClaimPopup from './ClaimPopup'
 
 const WHATNOT_URL = 'https://www.whatnot.com/s/WZZ45wou'
 
-/* ---------- Interactive 3D-tilt gift card ---------- */
+/* ---------- Interactive 3D tilt + flip gift card ---------- */
+const CARD_FACE =
+  'absolute inset-0 rounded-3xl border border-white/15 bg-gradient-to-br from-[#1c1c1f] via-[#101012] to-[#1a0a0a] overflow-hidden [backface-visibility:hidden]'
+
 function TiltCard() {
   const wrapRef = useRef(null)
   const [style, setStyle] = useState({})
   const [glare, setGlare] = useState({ x: 50, y: 50, o: 0 })
+  const [flipped, setFlipped] = useState(false)
+  const [touched, setTouched] = useState(false)
 
   function onMove(e) {
     const el = wrapRef.current
@@ -36,76 +41,146 @@ function TiltCard() {
     setGlare(g => ({ ...g, o: 0 }))
   }
 
+  function flip() {
+    setFlipped(f => !f)
+    setTouched(true)
+  }
+
   return (
     <div
       ref={wrapRef}
       onMouseMove={onMove}
       onMouseLeave={onLeave}
       className="relative select-none [perspective:1100px] motion-safe:animate-float"
-      aria-hidden="true"
     >
       {/* glow bed under the card */}
       <div className="absolute inset-6 rounded-[2rem] bg-gradient-to-br from-red-600/50 via-red-500/20 to-amber-500/40 blur-3xl" />
 
       <div
+        role="button"
+        tabIndex={0}
+        aria-label={flipped ? 'Flip the gift card to the front' : 'Flip the gift card over'}
+        onClick={flip}
+        onKeyDown={e => {
+          if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); flip() }
+        }}
         style={{
           transform: 'perspective(1100px) rotateX(12deg) rotateY(-14deg)',
           ...style,
         }}
-        className="relative w-[19rem] sm:w-[22rem] aspect-[8/5] rounded-3xl border border-white/15 bg-gradient-to-br from-[#1c1c1f] via-[#101012] to-[#1a0a0a] shadow-[0_40px_80px_-20px_rgba(0,0,0,0.8),0_0_40px_-10px_rgba(239,43,43,0.35)] overflow-hidden"
+        className="relative w-[19rem] sm:w-[22rem] aspect-[8/5] cursor-pointer rounded-3xl [transform-style:preserve-3d] shadow-[0_40px_80px_-20px_rgba(0,0,0,0.8),0_0_40px_-10px_rgba(239,43,43,0.35)] outline-none focus-visible:ring-2 focus-visible:ring-amber-400/80 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
       >
-        {/* holographic sheen */}
-        <div className="absolute inset-0 bg-[linear-gradient(115deg,transparent_20%,rgba(239,43,43,0.14)_38%,rgba(251,191,36,0.16)_50%,transparent_68%)]" />
-        {/* pointer glare */}
+        {/* flipper */}
         <div
-          className="absolute inset-0 transition-opacity duration-300"
+          className="absolute inset-0 [transform-style:preserve-3d] transition-transform duration-700"
           style={{
-            opacity: glare.o,
-            background: `radial-gradient(circle at ${glare.x}% ${glare.y}%, rgba(255,255,255,0.18), transparent 55%)`,
+            transform: flipped ? 'rotateY(180deg)' : 'rotateY(0deg)',
+            transitionTimingFunction: 'cubic-bezier(0.16, 1, 0.3, 1)',
           }}
-        />
-        {/* shine sweep */}
-        <div className="pointer-events-none absolute inset-0 overflow-hidden">
-          <div className="absolute top-0 h-full w-1/3 bg-gradient-to-r from-transparent via-white/10 to-transparent motion-safe:animate-shine" />
-        </div>
-
-        {/* card face */}
-        <div className="relative h-full flex flex-col justify-between p-5 sm:p-6">
-          <div className="flex items-start justify-between">
-            <Image
-              src="/logo-v3.png"
-              alt=""
-              width={150}
-              height={100}
-              className="h-10 w-auto object-contain"
+        >
+          {/* ---- front face ---- */}
+          <div className={CARD_FACE}>
+            {/* holographic sheen */}
+            <div className="absolute inset-0 bg-[linear-gradient(115deg,transparent_20%,rgba(239,43,43,0.14)_38%,rgba(251,191,36,0.16)_50%,transparent_68%)]" />
+            {/* pointer glare */}
+            <div
+              className="absolute inset-0 transition-opacity duration-300"
+              style={{
+                opacity: glare.o,
+                background: `radial-gradient(circle at ${glare.x}% ${glare.y}%, rgba(255,255,255,0.18), transparent 55%)`,
+              }}
             />
-            <span className="text-[9px] font-bold tracking-[0.25em] uppercase text-zinc-500 mt-1">
-              Giveaway Card
-            </span>
+            {/* shine sweep */}
+            <div className="pointer-events-none absolute inset-0 overflow-hidden">
+              <div className="absolute top-0 h-full w-1/3 bg-gradient-to-r from-transparent via-white/10 to-transparent motion-safe:animate-shine" />
+            </div>
+
+            <div className="relative h-full flex flex-col justify-between p-5 sm:p-6">
+              <div className="flex items-start justify-between">
+                <Image
+                  src="/logo-v3.png"
+                  alt=""
+                  width={150}
+                  height={100}
+                  className="h-10 w-auto object-contain"
+                />
+                <span className="text-[9px] font-bold tracking-[0.25em] uppercase text-zinc-500 mt-1">
+                  Giveaway Card
+                </span>
+              </div>
+
+              <div>
+                <p className="text-[10px] font-semibold tracking-[0.3em] uppercase text-zinc-500 mb-1">
+                  Amazon Gift Card
+                </p>
+                <p className="font-display text-2xl sm:text-3xl font-bold text-gradient-gold tracking-tight">
+                  You Won.
+                </p>
+              </div>
+
+              <div className="flex items-end justify-between">
+                <p className="font-mono text-[11px] tracking-[0.2em] text-zinc-600">
+                  XXXX-XXXXXX-XXXX
+                </p>
+                {/* faux QR */}
+                <div className="grid grid-cols-4 gap-[3px] p-[5px] rounded-md bg-white/90">
+                  {[1,0,1,1,0,1,0,1,1,0,1,0,1,1,0,1].map((v, i) => (
+                    <span key={i} className={`h-[5px] w-[5px] rounded-[1px] ${v ? 'bg-zinc-900' : 'bg-transparent'}`} />
+                  ))}
+                </div>
+              </div>
+            </div>
           </div>
 
-          <div>
-            <p className="text-[10px] font-semibold tracking-[0.3em] uppercase text-zinc-500 mb-1">
-              Amazon Gift Card
-            </p>
-            <p className="font-display text-2xl sm:text-3xl font-bold text-gradient-gold tracking-tight">
-              You Won.
-            </p>
-          </div>
+          {/* ---- back face ---- */}
+          <div className={`${CARD_FACE} [transform:rotateY(180deg)]`}>
+            {/* holographic sheen, mirrored */}
+            <div className="absolute inset-0 bg-[linear-gradient(245deg,transparent_20%,rgba(239,43,43,0.12)_40%,rgba(251,191,36,0.12)_52%,transparent_70%)]" />
 
-          <div className="flex items-end justify-between">
-            <p className="font-mono text-[11px] tracking-[0.2em] text-zinc-600">
-              XXXX-XXXXXX-XXXX
-            </p>
-            {/* faux QR */}
-            <div className="grid grid-cols-4 gap-[3px] p-[5px] rounded-md bg-white/90">
-              {[1,0,1,1,0,1,0,1,1,0,1,0,1,1,0,1].map((v, i) => (
-                <span key={i} className={`h-[5px] w-[5px] rounded-[1px] ${v ? 'bg-zinc-900' : 'bg-transparent'}`} />
-              ))}
+            <div className="relative h-full flex flex-col">
+              {/* magnetic stripe */}
+              <div className="mt-5 h-9 w-full bg-black/80 border-y border-white/5" />
+
+              <div className="flex-1 flex flex-col justify-between p-5 sm:p-6 pt-4">
+                {/* signature strip */}
+                <div className="flex items-center gap-3">
+                  <div className="h-7 flex-1 rounded-sm bg-zinc-200/90 flex items-center px-3">
+                    <span className="font-display text-sm font-bold italic text-zinc-700 -rotate-2">
+                      LIVESTEALS
+                    </span>
+                  </div>
+                  <span className="font-mono text-[10px] text-zinc-600">CVV ★★★</span>
+                </div>
+
+                <div>
+                  <p className="font-display text-xl sm:text-2xl font-bold tracking-tight text-gradient-gold mb-1">
+                    Scan. Claim. Spend.
+                  </p>
+                  <p className="text-[11px] leading-relaxed text-zinc-500">
+                    Winners get a QR code in the mail. Claiming takes
+                    under a minute — the code lands on screen and in your inbox.
+                  </p>
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <span className="text-[9px] font-bold tracking-[0.25em] uppercase text-zinc-600">
+                    One claim per card
+                  </span>
+                  <span className="font-mono text-[11px] text-zinc-500">livesteals.co</span>
+                </div>
+              </div>
             </div>
           </div>
         </div>
       </div>
+
+      {/* flip hint — fades out after first interaction */}
+      <p
+        aria-hidden="true"
+        className={`absolute -bottom-9 left-1/2 -translate-x-1/2 whitespace-nowrap text-[10px] font-bold uppercase tracking-[0.3em] text-zinc-600 transition-opacity duration-500 ${touched ? 'opacity-0' : 'motion-safe:animate-pulse-slow'}`}
+      >
+        Tap the card
+      </p>
     </div>
   )
 }
