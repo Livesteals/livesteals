@@ -96,7 +96,7 @@ function HowItWorks() {
   ]
 
   return (
-    <section id="how" className="relative mx-auto max-w-6xl px-5 sm:px-8 py-24 scroll-mt-12">
+    <section id="how" className="relative overflow-hidden mx-auto max-w-6xl px-5 sm:px-8 py-24 scroll-mt-12">
       <div className="pointer-events-none absolute top-0 left-1/2 h-64 w-[40rem] -translate-x-1/2 rounded-full bg-red-900/20 blur-[120px]" />
 
       <div className="relative text-center mb-16">

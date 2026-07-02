@@ -1,5 +1,6 @@
 'use client'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { useRouter } from 'next/navigation'
 
 export default function ClaimPopup({ trigger, className }) {
@@ -7,6 +8,14 @@ export default function ClaimPopup({ trigger, className }) {
   const [code, setCode] = useState('')
   const [error, setError] = useState('')
   const router = useRouter()
+
+  // Lock page scroll while the modal is open
+  useEffect(() => {
+    if (!open) return
+    const prev = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    return () => { document.body.style.overflow = prev }
+  }, [open])
 
   function handleSubmit(e) {
     e.preventDefault()
@@ -27,9 +36,9 @@ export default function ClaimPopup({ trigger, className }) {
         {trigger || 'Claim Gift Card'}
       </button>
 
-      {open && (
+      {open && createPortal(
         <div
-          className="fixed inset-0 z-[60] flex items-center justify-center bg-black/70 backdrop-blur-md p-6"
+          className="fixed inset-0 z-[60] flex items-center justify-center bg-black/90 backdrop-blur-md p-6"
           onClick={() => setOpen(false)}
         >
           <div
@@ -86,7 +95,8 @@ export default function ClaimPopup({ trigger, className }) {
               </p>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </>
   )

@@ -1,5 +1,6 @@
 'use client'
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import Image from 'next/image'
 import Link from 'next/link'
 import ClaimPopup from './ClaimPopup'
@@ -112,6 +113,14 @@ function TiltCard() {
 /* ---------- Hero ---------- */
 export default function Hero() {
   const [menuOpen, setMenuOpen] = useState(false)
+
+  // Lock page scroll while the menu is open
+  useEffect(() => {
+    if (!menuOpen) return
+    const prev = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    return () => { document.body.style.overflow = prev }
+  }, [menuOpen])
 
   return (
     <header className="relative overflow-hidden">
@@ -236,8 +245,8 @@ export default function Hero() {
       </div>
 
       {/* fullscreen mobile menu */}
-      {menuOpen && (
-        <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black/70 backdrop-blur-2xl motion-safe:animate-scale-in">
+      {menuOpen && createPortal(
+        <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black/90 backdrop-blur-2xl motion-safe:animate-scale-in">
           <button
             onClick={() => setMenuOpen(false)}
             aria-label="Close menu"
@@ -277,7 +286,8 @@ export default function Hero() {
               className="cursor-pointer font-display text-4xl font-bold tracking-tight text-gradient-gold"
             />
           </nav>
-        </div>
+        </div>,
+        document.body
       )}
     </header>
   )
