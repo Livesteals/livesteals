@@ -9,7 +9,18 @@ const WHATNOT_URL = 'https://www.whatnot.com/s/WZZ45wou'
 
 /* ---------- Interactive 3D tilt + flip gift card ---------- */
 const CARD_FACE =
-  'absolute inset-0 rounded-3xl border border-white/15 bg-gradient-to-br from-[#1c1c1f] via-[#101012] to-[#1a0a0a] overflow-hidden [backface-visibility:hidden]'
+  'absolute inset-0 rounded-3xl border border-white/15 bg-gradient-to-br from-[#1c1c1f] via-[#101012] to-[#1a0a0a] overflow-hidden backface-hidden'
+
+// iOS Safari ignores backface-visibility on composited faces (the animated
+// shine/glare layers force flattening), so also hard-hide the turned-away
+// face at the flip midpoint, when the card is edge-on and effectively
+// invisible. The 0.12s delay matches 90deg on the 0.7s ease-out flip.
+function faceVisibility(visible) {
+  return {
+    visibility: visible ? 'visible' : 'hidden',
+    transition: 'visibility 0s linear 0.12s',
+  }
+}
 
 function TiltCard() {
   const wrapRef = useRef(null)
@@ -79,7 +90,7 @@ function TiltCard() {
           }}
         >
           {/* ---- front face ---- */}
-          <div className={CARD_FACE}>
+          <div className={CARD_FACE} style={faceVisibility(!flipped)}>
             {/* holographic sheen */}
             <div className="absolute inset-0 bg-[linear-gradient(115deg,transparent_20%,rgba(239,43,43,0.14)_38%,rgba(251,191,36,0.16)_50%,transparent_68%)]" />
             {/* pointer glare */}
@@ -133,7 +144,7 @@ function TiltCard() {
           </div>
 
           {/* ---- back face ---- */}
-          <div className={`${CARD_FACE} [transform:rotateY(180deg)]`}>
+          <div className={`${CARD_FACE} [transform:rotateY(180deg)]`} style={faceVisibility(flipped)}>
             {/* holographic sheen, mirrored */}
             <div className="absolute inset-0 bg-[linear-gradient(245deg,transparent_20%,rgba(239,43,43,0.12)_40%,rgba(251,191,36,0.12)_52%,transparent_70%)]" />
 

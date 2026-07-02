@@ -86,6 +86,11 @@ body {
     background-clip: text;
     color: transparent;
   }
+
+  .backface-hidden {
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+  }
 }
 
 /* Rotating conic border (border-beam) — wrap content in .beam-content */
@@ -124,5 +129,6 @@ body {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
+    transition-delay: 0.01ms !important;
   }
 }
