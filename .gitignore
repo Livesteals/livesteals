@@ -25,6 +25,3 @@ yarn-error.log*
 
 # editor / tooling
 .claude/
-
-# lockfiles (project installs latest on deploy)
-package-lock.json

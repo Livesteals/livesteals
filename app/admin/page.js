@@ -2,13 +2,14 @@
 import { useState, useEffect } from 'react'
 import { pickAllCodes } from '../../lib/extractCode'
 
+// Auth is a signed, HttpOnly session cookie set by /api/admin/login. The browser
+// sends it automatically on same-origin requests, so nothing sensitive is stored
+// in JS-readable localStorage.
 function adminFetch(url, options = {}) {
-  const pw = typeof window !== 'undefined' ? localStorage.getItem('ls_pw') : ''
   return fetch(url, {
     ...options,
     headers: {
       'Content-Type': 'application/json',
-      'x-admin-password': pw || '',
       ...(options.headers || {}),
     },
   })
@@ -150,12 +151,10 @@ export default function AdminPage() {
   const [activityLoading, setActivityLoading] = useState(false)
 
   useEffect(() => {
-    const saved = localStorage.getItem('ls_pw')
-    if (!saved) return
-    fetch('/api/admin/stats', { headers: { 'x-admin-password': saved } })
+    // Do we already have a valid session cookie? Ask an admin endpoint.
+    fetch('/api/admin/stats')
       .then(r => {
         if (r.ok) { setAuthed(true); return r.json() }
-        localStorage.removeItem('ls_pw')
       })
       .then(data => { if (data) setStats(data) })
       .catch(() => {})
@@ -175,20 +174,24 @@ export default function AdminPage() {
   async function handleLogin(e) {
     e.preventDefault()
     setAuthError('')
-    const res = await fetch('/api/admin/stats', {
-      headers: { 'x-admin-password': password },
+    const res = await fetch('/api/admin/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ password }),
     })
     if (res.ok) {
-      localStorage.setItem('ls_pw', password)
+      setPassword('')
       setAuthed(true)
-      setStats(await res.json())
+      loadStats()
+    } else if (res.status === 429) {
+      setAuthError('Too many attempts. Please wait a few minutes and try again.')
     } else {
       setAuthError('Incorrect password.')
     }
   }
 
-  function logout() {
-    localStorage.removeItem('ls_pw')
+  async function logout() {
+    try { await fetch('/api/admin/logout', { method: 'POST' }) } catch {}
     setAuthed(false)
     setPassword('')
     setStats(null)

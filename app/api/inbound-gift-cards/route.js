@@ -1,10 +1,19 @@
 import { supabase } from '../../../lib/supabase'
 import { pickAllCodes } from '../../../lib/extractCode'
 import { NextResponse } from 'next/server'
+import crypto from 'crypto'
+
+function safeEqual(a, b) {
+  const ba = Buffer.from(String(a))
+  const bb = Buffer.from(String(b))
+  if (ba.length !== bb.length) return false
+  return crypto.timingSafeEqual(ba, bb)
+}
 
 export async function POST(request) {
   const { searchParams } = new URL(request.url)
-  if (searchParams.get('token') !== process.env.POSTMARK_WEBHOOK_SECRET) {
+  const secret = process.env.POSTMARK_WEBHOOK_SECRET
+  if (!secret || !safeEqual(searchParams.get('token') || '', secret)) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
@@ -36,7 +45,8 @@ export async function POST(request) {
     .select()
 
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 })
+    console.error('inbound-gift-cards upsert error:', error)
+    return NextResponse.json({ error: 'server_error' }, { status: 500 })
   }
 
   return NextResponse.json({ added: data?.length ?? 0 })
